@@ -1,13 +1,13 @@
-package com.huydt.uikit.list
+package com.huydt.uikit.list.domain
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 
-class UiKitListViewModelFactory<T>(
-    private val repository: UiKitListRepository<T>
+class ListViewModelFactory<T>(
+    private val repository: ListRepository<T>
 ) : ViewModelProvider.Factory {
 
     override fun <VM : ViewModel> create(modelClass: Class<VM>): VM {
-        return UiKitListViewModel(repository) as VM
+        return ListViewModel(repository) as VM
     }
 }

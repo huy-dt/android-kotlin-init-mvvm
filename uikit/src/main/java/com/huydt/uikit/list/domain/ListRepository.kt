@@ -1,6 +1,6 @@
-package com.huydt.uikit.list
+package com.huydt.uikit.list.domain
 
-interface UiKitListRepository<T> {
+interface ListRepository<T> {
 
     suspend fun getItems(
         page: Int,
