@@ -1,0 +1,7 @@
+<resources>
+
+    <style name="Theme.App" parent="android:Theme.DeviceDefault.Light.NoActionBar">
+        <!-- Không cần gì thêm -->
+    </style>
+
+</resources>
