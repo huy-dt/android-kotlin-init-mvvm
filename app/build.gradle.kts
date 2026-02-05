@@ -134,6 +134,7 @@ dependencies {
     implementation(project(":core"))
     implementation(project(":database"))
     implementation(project(":feature_auth"))
+    implementation(project(":feature_user"))
 
     implementation(platform(libs.androidx.compose.bom))
 

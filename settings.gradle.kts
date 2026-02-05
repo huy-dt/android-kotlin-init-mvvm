@@ -15,7 +15,10 @@
 
 rootProject.name = "android-kotlin-mvvm-full"
 
+include(":uikit")
+
 include(":app")
 include(":core")
 include(":database")
 include(":feature_auth")
+include(":feature_user")

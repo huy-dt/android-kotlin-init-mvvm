@@ -4,7 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.xxx.app.feature_auth.ui.AuthTabScreen
+import com.xxx.app.feature_user.ui.ListUserScreen
+// import com.xxx.app.feature_auth.ui.AuthTabScreen
 
 @Composable
 fun AppNavHost() {
@@ -13,11 +14,15 @@ fun AppNavHost() {
 
     NavHost(
         navController = navController,
-        startDestination = "auth"
+        startDestination = "list_user"
     ) {
-        composable("auth") {
-            AuthTabScreen()
+
+        composable("list_user") {
+            ListUserScreen()
         }
+
+        // sau này mở lại auth thì thêm vào
+        // composable("auth") { AuthTabScreen() }
 
         // composable("home") { HomeScreen() }
     }
