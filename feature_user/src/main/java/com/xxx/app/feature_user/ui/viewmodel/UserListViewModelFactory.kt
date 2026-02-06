@@ -1,4 +1,4 @@
-package com.xxx.app.feature_user.ui
+package com.xxx.app.feature_user.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider

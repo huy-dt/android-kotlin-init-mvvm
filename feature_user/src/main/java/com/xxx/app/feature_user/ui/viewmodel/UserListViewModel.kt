@@ -1,4 +1,4 @@
-package com.xxx.app.feature_user.ui
+package com.xxx.app.feature_user.ui.viewmodel
 
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -19,6 +19,7 @@ class UserListViewModel(
         pageSize = 20,
         enableRefresh = true,
         enableLoadMore = true,
+        clearOnRefresh = false,
         selectionMode = SelectionMode.MULTI
     )
 ) {

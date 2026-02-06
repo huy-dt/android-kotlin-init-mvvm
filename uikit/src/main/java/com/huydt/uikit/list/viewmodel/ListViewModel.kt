@@ -12,6 +12,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 open class ListViewModel<T>(
@@ -20,6 +22,8 @@ open class ListViewModel<T>(
 ) : ViewModel() {
 
     /* ------------ State ------------ */
+    private val _scrollToTop = Channel<Unit>(Channel.BUFFERED)
+    val scrollToTop = _scrollToTop.receiveAsFlow()
 
     private val _uiState = MutableStateFlow(ListUiState<T>())
     val uiState: StateFlow<ListUiState<T>> = _uiState
@@ -30,6 +34,8 @@ open class ListViewModel<T>(
     private var page = 0
     private var currentQuery: String? = null
     private var searchJob: Job? = null
+
+    private var loadJob: Job? = null
 
     /* =========================================================
      * Selection API
@@ -143,19 +149,26 @@ open class ListViewModel<T>(
 
     fun refresh() {
         if (!config.enableRefresh) return
-        if (_uiState.value.status is ListStatus.Refreshing ||
-            _uiState.value.status is ListStatus.LoadingMore
-        ) return
+        
+        // Nếu đang refresh rồi thì bỏ qua, nhưng nếu đang LoadMore thì sẽ Cancel LoadMore để Refresh
+        if (_uiState.value.status is ListStatus.Refreshing) return
 
-        viewModelScope.launch {
+        // QUAN TRỌNG: Hủy bất kỳ tiến trình load nào đang chạy (bao gồm LoadMore)
+        loadJob?.cancel()
+
+        loadJob = viewModelScope.launch {
             _uiState.update {
                 it.copy(status = ListStatus.Refreshing, selectedItems = emptySet())
             }
             resetPaging()
 
+            if(config.clearOnRefresh)
+                clearItems()
+
             try {
                 val data = repository.getItems(page, config.pageSize, currentQuery)
                 page++
+                
                 _uiState.update {
                     it.copy(
                         items = data,
@@ -163,7 +176,11 @@ open class ListViewModel<T>(
                         canLoadMore = config.enableLoadMore && data.size == config.pageSize
                     )
                 }
+                
+                _scrollToTop.send(Unit) 
+
             } catch (e: Exception) {
+                // Kiểm tra nếu lỗi không phải do bị Cancel Job chủ động
                 _uiState.update {
                     it.copy(
                         status = ListStatus.Error(e.message ?: "Unknown Error"),
@@ -176,13 +193,16 @@ open class ListViewModel<T>(
 
     fun loadMore() {
         val state = _uiState.value
+        // Chặn LoadMore nếu không rảnh (Status không phải Idle)
         if (!config.enableLoadMore || !state.canLoadMore || state.status !is ListStatus.Idle) return
 
-        viewModelScope.launch {
+        // Gán vào loadJob để refresh() có thể cancel nó
+        loadJob = viewModelScope.launch {
             _uiState.update { it.copy(status = ListStatus.LoadingMore) }
             try {
                 val more = repository.getItems(page, config.pageSize, currentQuery)
                 page++
+                
                 _uiState.update {
                     it.copy(
                         items = it.items + more,

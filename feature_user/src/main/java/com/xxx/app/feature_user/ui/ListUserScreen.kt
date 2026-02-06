@@ -1,6 +1,8 @@
 package com.xxx.app.feature_user.ui
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -10,9 +12,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.xxx.app.feature_user.data.UserListRepository
 import com.xxx.app.feature_user.domain.model.UserDto
+import com.xxx.app.feature_user.ui.viewmodel.*
 import com.huydt.uikit.list.ui.UiKitListView
-import com.huydt.uikit.list.viewmodel.ListViewModel
-import com.huydt.uikit.list.viewmodel.ListViewModelFactory
 
 @Composable
 fun ListUserScreen() {
@@ -23,45 +24,77 @@ fun ListUserScreen() {
     )
 
     val selectedItems by userViewModel.selectedItems.collectAsStateWithLifecycle()
+    // Lấy status từ VM để hiển thị hiệu ứng xoay icon nếu muốn
+    val uiState by userViewModel.uiState.collectAsStateWithLifecycle()
     var textSearch by remember { mutableStateOf("") }
 
     Column(Modifier.fillMaxSize()) {
-
-        TextField(
-            value = textSearch,
-            onValueChange = {
-                textSearch = it
-                userViewModel.search(it)
-            },
+        // --- Hàng tìm kiếm & Nút Refresh ---
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.dp),
-            placeholder = { Text("Tìm kiếm User...") }
-        )
-
-        if (selectedItems.isNotEmpty()) {
-            Row(
-                Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text("Đã chọn: ${selectedItems.size}")
-                Spacer(Modifier.weight(1f))
-                TextButton(onClick = { userViewModel.selectAll() }) {
-                    Text("Tất cả")
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            TextField(
+                value = textSearch,
+                onValueChange = {
+                    textSearch = it
+                    userViewModel.search(it)
+                },
+                modifier = Modifier.weight(1f),
+                placeholder = { Text("Tìm kiếm User...") },
+                trailingIcon = {
+                    // Nút refresh nhỏ bên trong TextField (Option 1)
+                    IconButton(onClick = { userViewModel.refresh() }) {
+                        Icon(Icons.Default.Refresh, contentDescription = "Refresh")
+                    }
                 }
-                TextButton(onClick = { userViewModel.clearSelection() }) {
-                    Text("Xóa chọn")
+            )
+            
+            /* // Nếu muốn nút Refresh nằm ngoài TextField (Option 2)
+            IconButton(
+                onClick = { userViewModel.refresh() },
+                modifier = Modifier.padding(start = 4.dp)
+            ) {
+                Icon(Icons.Default.Refresh, contentDescription = "Refresh")
+            }
+            */
+        }
+
+        // --- Thanh công cụ khi chọn nhiều ---
+        if (selectedItems.isNotEmpty()) {
+            Surface(
+                color = MaterialTheme.colorScheme.primaryContainer,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        "Đã chọn: ${selectedItems.size}", 
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                    Spacer(Modifier.weight(1f))
+                    TextButton(onClick = { userViewModel.selectAll() }) {
+                        Text("Tất cả")
+                    }
+                    TextButton(onClick = { userViewModel.clearSelection() }) {
+                        Text("Xóa chọn")
+                    }
                 }
             }
         }
 
+        // --- Danh sách hiển thị ---
         UiKitListView(
-            repository = repository,
-            viewModel = userViewModel,
-            itemKey = { it.id }
-        ) { user, isSelected, vm ->
+            vm = userViewModel,
+            modifier = Modifier.weight(1f)
+        ) { user, isSelected ->
             UserItem(
                 user = user,
                 isSelected = isSelected,

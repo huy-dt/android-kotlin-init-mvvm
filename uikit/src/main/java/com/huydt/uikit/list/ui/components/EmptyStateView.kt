@@ -8,7 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun ListEmptyState(message: String, onReload: () -> Unit) {
+fun EmptyStateView(message: String, onRefresh: () -> Unit) {
     Column(
         modifier = Modifier.fillMaxSize().padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -16,7 +16,7 @@ fun ListEmptyState(message: String, onReload: () -> Unit) {
     ) {
         Text(message, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.outline)
         Spacer(modifier = Modifier.height(16.dp))
-        Button(onClick = onReload) { Text("Thử lại") }
+        Button(onClick = onRefresh) { Text("Thử lại") }
     }
 }
 
