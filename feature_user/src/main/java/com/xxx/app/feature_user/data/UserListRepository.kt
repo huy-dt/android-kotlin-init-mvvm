@@ -2,7 +2,7 @@ package com.xxx.app.feature_user.data
 
 import com.xxx.app.core.domain.model.Role
 import com.xxx.app.feature_user.domain.model.UserDto
-import com.huydt.uikit.list.domain.ListRepository
+import com.huydt.uikit.list.data.ListRepository
 import kotlinx.coroutines.delay
 import java.util.Collections
 
@@ -44,9 +44,9 @@ class UserListRepository : ListRepository<UserDto> {
 
         val filtered = if (!query.isNullOrBlank()) {
             users.filter {
-                it.username.contains(query, true) ||
-                it.email.contains(query, true) ||
-                it.role.name.contains(query, true)
+                it.username.contains(query, true)
+                // it.email.contains(query, true) ||
+                // it.role.name.contains(query, true)
             }
         } else {
             users.toList()

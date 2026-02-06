@@ -1,4 +1,6 @@
-package com.huydt.uikit.list.domain
+package com.huydt.uikit.list.viewmodel
+
+import com.huydt.uikit.list.data.ListRepository
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider

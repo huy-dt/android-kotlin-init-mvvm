@@ -1,4 +1,4 @@
-package com.huydt.uikit.list.domain
+package com.huydt.uikit.list.ui.state
 
 sealed class ListStatus {
     object Idle : ListStatus()

@@ -1,4 +1,4 @@
-package com.huydt.uikit.list.domain
+package com.huydt.uikit.list.data
 
 interface ListRepository<T> {
 
