@@ -71,6 +71,7 @@ fun <T> UiKitListView(
         vm.scrollToTop.collect {
             listState.scroll { }
             listState.scrollToItem(0)
+            openedItemKey = null
         }
     }
 
@@ -174,7 +175,7 @@ fun <T> UiKitListView(
                         }
                     }
 
-                    if (uiState.canLoadMore) {
+                    // if (uiState.canLoadMore) {
                         item {
                             FooterContent(
                                 isLoading = uiState.status is ListStatus.LoadingMore,
@@ -183,7 +184,7 @@ fun <T> UiKitListView(
                                 isPaginationEnabled = vm.config.enableLoadMore
                             )
                         }
-                    }
+                    // }
                 }
             }
         }

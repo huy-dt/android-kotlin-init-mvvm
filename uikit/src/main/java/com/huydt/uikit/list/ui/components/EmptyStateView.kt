@@ -19,10 +19,3 @@ fun EmptyStateView(message: String, onRefresh: () -> Unit) {
         Button(onClick = onRefresh) { Text("Thử lại") }
     }
 }
-
-@Composable
-fun LoadMoreIndicator() {
-    Box(modifier = Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
-        CircularProgressIndicator(modifier = Modifier.size(32.dp), strokeWidth = 2.dp)
-    }
-}
