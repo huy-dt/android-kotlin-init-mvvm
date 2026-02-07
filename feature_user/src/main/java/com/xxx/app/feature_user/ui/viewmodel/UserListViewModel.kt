@@ -6,13 +6,15 @@ import androidx.lifecycle.viewModelScope
 import com.huydt.uikit.list.viewmodel.*
 import com.huydt.uikit.list.config.*
 import com.huydt.uikit.list.ui.swipe.SwipeActions
-import com.xxx.app.feature_user.data.UserListRepository
+import com.huydt.uikit.list.data.ListRepository
 import com.xxx.app.feature_user.domain.model.UserDto
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
-class UserListViewModel(
-    private val userRepository: UserListRepository
+import javax.inject.Inject
+
+class UserListViewModel @Inject constructor(
+    private val userRepository: ListRepository<UserDto>
 ) : ListViewModel<UserDto>(
     repository = userRepository,
     config = ListConfig(

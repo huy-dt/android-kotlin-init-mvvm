@@ -1,12 +1,15 @@
-package com.xxx.app.feature_user.data
+
+package com.xxx.app.feature_user.data.datasource
 
 import com.xxx.app.core.domain.model.Role
 import com.xxx.app.feature_user.domain.model.UserDto
 import com.huydt.uikit.list.data.ListRepository
 import kotlinx.coroutines.delay
 import java.util.Collections
+import javax.inject.Inject
 
-class UserListRepository : ListRepository<UserDto> {
+class UserListFakeDataSource @Inject constructor(
+): UserListDataSource {
 
     // Sử dụng Thread-safe list để tránh crash khi thao tác nhanh
     private val users = Collections.synchronizedList(mutableListOf<UserDto>())

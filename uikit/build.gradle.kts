@@ -39,6 +39,8 @@ android {
 }
 
 dependencies {
+    
+    implementation("javax.inject:javax.inject:1")
 
     // ⭐ BẮT BUỘC: Compose BOMdependencies {
     implementation(platform(libs.androidx.compose.bom))

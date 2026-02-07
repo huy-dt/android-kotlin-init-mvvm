@@ -10,14 +10,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.xxx.app.feature_user.data.UserListRepository
+import com.xxx.app.feature_user.data.datasource.UserListFakeDataSource
 import com.xxx.app.feature_user.domain.model.UserDto
 import com.xxx.app.feature_user.ui.viewmodel.*
 import com.huydt.uikit.list.ui.UiKitListView
 
 @Composable
 fun ListUserScreen() {
-    val repository = remember { UserListRepository() }
+    val repository = remember { UserListFakeDataSource() }
 
     val userViewModel: UserListViewModel = viewModel(
         factory = UserListViewModelFactory(repository)
@@ -98,7 +98,7 @@ fun ListUserScreen() {
             UserItem(
                 user = user,
                 isSelected = isSelected,
-                onRemove = { userViewModel.remove(user) }
+                // onRemove = { userViewModel.remove(user) }
             )
         }
     }
