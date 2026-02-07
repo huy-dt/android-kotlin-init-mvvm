@@ -61,7 +61,7 @@ fun <T> UiKitListView(
     }
 
     LaunchedEffect(uiState.items, uiState.status) {
-        if (uiState.items.isEmpty() && uiState.status is ListStatus.Idle) {
+        if (uiState.items.isEmpty() && uiState.status is ListStatus.Init) {
             vm.load()
         }
     }
@@ -107,7 +107,7 @@ fun <T> UiKitListView(
                 }
             }
             uiState.items.isEmpty() -> {
-                if (uiState.status != ListStatus.Idle && uiState.status !is ListStatus.Refreshing) {
+                if (uiState.status != ListStatus.Init && uiState.status !is ListStatus.Refreshing) {
                     EmptyStateView(
                         message = (uiState.status as? ListStatus.Error)?.message ?: "Không có dữ liệu",
                         onRefresh = { vm.refresh() }

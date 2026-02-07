@@ -2,7 +2,7 @@ package com.huydt.uikit.list.ui.state
 
 data class ListUiState<T>(
     val items: List<T> = emptyList(),
-    val status: ListStatus = ListStatus.Idle,
+    val status: ListStatus = ListStatus.Init,
     val selectedItems: Set<T> = emptySet(),
     val canLoadMore: Boolean = true
 ) {
