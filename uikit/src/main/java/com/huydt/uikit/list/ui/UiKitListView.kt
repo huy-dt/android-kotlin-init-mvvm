@@ -143,35 +143,38 @@ fun <T> UiKitListView(
                             wrapper
                         }
 
-                        SwipeActionItem(
-                            isOpened = isOpened,
-                            onOpened = { openedItemKey = currentItemKey },
-                            onClosed = { if (openedItemKey == currentItemKey) openedItemKey = null },
-                            leftActions = lActions,
-                            rightActions = rActions,
-                            leftTotalPx = startActionsTotalPx,
-                            rightTotalPx = endActionsTotalPx
-                        ) {
-                            val isSelected = uiState.selectedItems.contains(item)
-                            ListItemContent(
-                                item = item,
-                                isSelected = isSelected,
-                                isSelectionMode = isSelectionMode,
-                                haptic = haptic,
-                                onItemClick = { clickedItem ->
-                                    if (openedItemKey != null) {
-                                        // openedItemKey = null
-                                    } else {
-                                        if (isSelectionMode) vm.toggleSelection(clickedItem)
-                                        // Nếu cần xử lý click riêng, bạn có thể gọi qua config hoặc một hàm open trong VM
-                                    }
-                                },
-                                onToggleSelection = { toggledItem ->
-                                    openedItemKey = null
-                                    vm.toggleSelection(toggledItem)
-                                },
-                                itemContent = itemContent
-                            )
+                        // key() fix lỗi rất quan trong Lưu Ý
+                        key(currentItemKey to isSelectionMode) {
+                            SwipeActionItem(
+                                isOpened = isOpened,
+                                onOpened = { openedItemKey = currentItemKey },
+                                onClosed = { if (openedItemKey == currentItemKey) openedItemKey = null },
+                                leftActions = lActions,
+                                rightActions = rActions,
+                                leftTotalPx = startActionsTotalPx,
+                                rightTotalPx = endActionsTotalPx
+                            ) {
+                                val isSelected = uiState.selectedItems.contains(item)
+                                ListItemContent(
+                                    item = item,
+                                    isSelected = isSelected,
+                                    isSelectionMode = isSelectionMode,
+                                    haptic = haptic,
+                                    onItemClick = { clickedItem ->
+                                        if (openedItemKey != null) {
+                                            // openedItemKey = null
+                                        } else {
+                                            if (isSelectionMode) vm.toggleSelection(clickedItem)
+                                            // Nếu cần xử lý click riêng, bạn có thể gọi qua config hoặc một hàm open trong VM
+                                        }
+                                    },
+                                    onToggleSelection = { toggledItem ->
+                                        openedItemKey = null
+                                        vm.toggleSelection(toggledItem)
+                                    },
+                                    itemContent = itemContent
+                                )
+                            }
                         }
                     }
 
