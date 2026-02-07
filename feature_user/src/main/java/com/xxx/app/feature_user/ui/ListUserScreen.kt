@@ -15,13 +15,17 @@ import com.xxx.app.feature_user.domain.model.UserDto
 import com.xxx.app.feature_user.ui.viewmodel.*
 import com.huydt.uikit.list.ui.UiKitListView
 
-@Composable
-fun ListUserScreen() {
-    val repository = remember { UserListFakeDataSource() }
+import androidx.hilt.navigation.compose.hiltViewModel
 
-    val userViewModel: UserListViewModel = viewModel(
-        factory = UserListViewModelFactory(repository)
-    )
+@Composable
+fun ListUserScreen(
+    userViewModel: UserListViewModel = hiltViewModel()
+) {
+    // val repository = remember { UserListFakeDataSource() }
+
+    // val userViewModel: UserListViewModel = viewModel(
+    //     factory = UserListViewModelFactory(repository)
+    // )
 
     val selectedItems by userViewModel.selectedItems.collectAsStateWithLifecycle()
     // Lấy status từ VM để hiển thị hiệu ứng xoay icon nếu muốn

@@ -12,7 +12,9 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 import javax.inject.Inject
+import dagger.hilt.android.lifecycle.HiltViewModel
 
+@HiltViewModel
 class UserListViewModel @Inject constructor(
     private val userRepository: ListRepository<UserDto>
 ) : ListViewModel<UserDto>(
