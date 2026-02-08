@@ -107,3 +107,6 @@ echo ""
 echo "👉 Open new terminal or run: source ~/.bashrc"
 echo "👉 Then run: ./gradlew assembleDebug"
 echo "======================================"
+
+chmod +x gradlew
+./gradlew assembleDebug
