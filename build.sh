@@ -99,7 +99,6 @@ fi
 echo ">> Project root: $PROJECT_ROOT"
 
 echo "sdk.dir=$ANDROID_HOME" > "$PROJECT_ROOT/local.properties"
-echo "org.gradle.java.home=$JAVA_21_PATH" > "$PROJECT_ROOT/gradle.properties"
 
 echo "--------------------------------------"
 echo ">> [8/8] Stop Gradle daemon (important)"
