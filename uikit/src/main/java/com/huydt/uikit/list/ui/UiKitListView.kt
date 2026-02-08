@@ -27,6 +27,7 @@ import com.huydt.uikit.list.viewmodel.ListViewModel
 fun <T> UiKitListView(
     vm: ListViewModel<T>,
     modifier: Modifier = Modifier,
+    contentPadding: PaddingValues = PaddingValues(0.dp),
     itemContent: @Composable (T, Boolean) -> Unit
 ) {
     val uiState by vm.uiState.collectAsStateWithLifecycle()
@@ -99,7 +100,10 @@ fun <T> UiKitListView(
         }
     }
 
-    Box(modifier = modifier.fillMaxSize().nestedScroll(pullState.nestedScrollConnection)) {
+    Box(modifier = modifier.fillMaxSize()
+        .padding(contentPadding)
+        .nestedScroll(pullState.nestedScrollConnection)
+    ) {
         when {
             uiState.items.isEmpty() && uiState.status is ListStatus.Refreshing -> {
                 Box(Modifier.fillMaxSize(), Alignment.Center) {
