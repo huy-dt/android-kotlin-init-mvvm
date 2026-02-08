@@ -11,16 +11,16 @@ plugins {
 
 /**
  * =====================================================
- * READ local.properties (KHÔNG COMMIT GIT)
+ * READ keystore.properties (KHÔNG COMMIT GIT)
  * =====================================================
  */
 val localProperties = Properties().apply {
-    val file = rootProject.file("local.properties")
+    val file = rootProject.file("keystore.properties")
     if (file.exists()) {
         file.inputStream().use { load(it) }
-        logger.lifecycle("local.properties loaded from ${file.absolutePath}")
+        logger.lifecycle("keystore.properties loaded from ${file.absolutePath}")
     } else {
-        logger.lifecycle("local.properties NOT FOUND at ${file.absolutePath}")
+        logger.lifecycle("keystore.properties NOT FOUND at ${file.absolutePath}")
     }
 }
 
