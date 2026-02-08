@@ -2,7 +2,8 @@
 set -e
 
 echo "======================================"
-echo " Java 21 + Android SDK full setup"
+echo " Java 21 + Android SDK FULL SETUP"
+echo " (Codespaces safe)"
 echo "======================================"
 
 ### -------- CONFIG --------
@@ -14,13 +15,22 @@ ANDROID_PLATFORM="android-35"
 BUILD_TOOLS="35.0.0"
 ### ------------------------
 
-sudo rm -f /etc/apt/sources.list.d/yarn.list
+echo ">> Remove Yarn repo (apt issue fix)"
+sudo rm -f /etc/apt/sources.list.d/yarn.list || true
 
-echo ">> [1/6] Install Java 21"
+echo ">> Update system"
 sudo apt update
+
+echo "--------------------------------------"
+echo ">> [1/8] Install Java 21"
 sudo apt install -y openjdk-21-jdk
 
-echo ">> Set JAVA_HOME"
+echo ">> Remove Microsoft OpenJDK 25 (VERY IMPORTANT)"
+sudo apt remove -y msopenjdk-25 || true
+sudo apt autoremove -y || true
+
+echo "--------------------------------------"
+echo ">> [2/8] Set JAVA_HOME"
 export JAVA_HOME="$JAVA_21_PATH"
 export PATH="$JAVA_HOME/bin:$PATH"
 
@@ -34,16 +44,15 @@ fi
 sudo update-alternatives --set java "$JAVA_21_PATH/bin/java" || true
 sudo update-alternatives --set javac "$JAVA_21_PATH/bin/javac" || true
 
-echo ">> Java version:"
+echo ">> Java runtime:"
 java --version
 
 echo "--------------------------------------"
-echo ">> [2/6] Setup Android SDK (CLI)"
+echo ">> [3/8] Setup Android SDK (CLI)"
 mkdir -p "$SDK_DIR/cmdline-tools"
 cd "$SDK_DIR"
 
 if [ ! -d "$SDK_DIR/cmdline-tools/latest" ]; then
-  echo ">> Download cmdline-tools"
   wget -q "$CMDLINE_URL"
   unzip -q "$CMDLINE_ZIP" -d cmdline-tools
   mv cmdline-tools/cmdline-tools cmdline-tools/latest
@@ -53,7 +62,7 @@ else
 fi
 
 echo "--------------------------------------"
-echo ">> [3/6] Export Android env vars"
+echo ">> [4/8] Export Android env vars"
 export ANDROID_SDK_ROOT="$SDK_DIR"
 export ANDROID_HOME="$SDK_DIR"
 export PATH="$PATH:$ANDROID_HOME/cmdline-tools/latest/bin"
@@ -69,44 +78,43 @@ if ! grep -q ANDROID_HOME ~/.bashrc; then
 fi
 
 echo "--------------------------------------"
-echo ">> [4/6] Accept Android licenses"
+echo ">> [5/8] Accept Android licenses"
 yes | sdkmanager --licenses
 
 echo "--------------------------------------"
-echo ">> [5/6] Install Android packages"
+echo ">> [6/8] Install Android packages"
 sdkmanager \
   "platform-tools" \
   "platforms;$ANDROID_PLATFORM" \
   "build-tools;$BUILD_TOOLS"
 
 echo "--------------------------------------"
-echo ">> [6/6] Create local.properties for Gradle"
+echo ">> [7/8] Configure Gradle (FORCE Java 21)"
 
-# Find project root (where gradlew exists)
-PROJECT_ROOT=$(pwd)
+PROJECT_ROOT="/workspaces/$(basename "$(pwd -P | sed 's#.*/workspaces/##')")"
 if [ ! -f "$PROJECT_ROOT/gradlew" ]; then
-  PROJECT_ROOT=$(find "$HOME" -maxdepth 4 -name gradlew -type f | head -n 1 | xargs dirname)
+  PROJECT_ROOT=$(find /workspaces -name gradlew -type f | head -n 1 | xargs dirname)
 fi
 
-if [ -n "$PROJECT_ROOT" ]; then
-  echo ">> Project root: $PROJECT_ROOT"
-  echo "sdk.dir=$ANDROID_HOME" > "$PROJECT_ROOT/local.properties"
-else
-  echo "⚠️  gradlew not found, skip local.properties"
-fi
+echo ">> Project root: $PROJECT_ROOT"
+
+echo "sdk.dir=$ANDROID_HOME" > "$PROJECT_ROOT/local.properties"
+echo "org.gradle.java.home=$JAVA_21_PATH" > "$PROJECT_ROOT/gradle.properties"
+
+echo "--------------------------------------"
+echo ">> [8/8] Stop Gradle daemon (important)"
+cd "$PROJECT_ROOT"
+./gradlew --stop || true
 
 echo "======================================"
 echo "✅ SETUP DONE"
 echo ""
-echo "Java:"
+echo "Java (system):"
 java --version
 echo ""
-echo "Android SDK:"
-sdkmanager --list | head -n 10
+echo "Gradle JVM:"
+./gradlew -version | grep JVM
 echo ""
 echo "👉 Open new terminal or run: source ~/.bashrc"
-echo "👉 Then run: ./gradlew assembleDebug"
+echo "👉 Then run: ./gradlew :app:assembleDebug"
 echo "======================================"
-
-chmod +x gradlew
-./gradlew assembleDebug
