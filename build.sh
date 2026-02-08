@@ -14,6 +14,8 @@ ANDROID_PLATFORM="android-35"
 BUILD_TOOLS="35.0.0"
 ### ------------------------
 
+sudo rm -f /etc/apt/sources.list.d/yarn.list
+
 echo ">> [1/6] Install Java 21"
 sudo apt update
 sudo apt install -y openjdk-21-jdk
