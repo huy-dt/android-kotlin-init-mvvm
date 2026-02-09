@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.huydt.uikit.topbar.model.TopBarItem
+import com.huydt.uikit.topbar.model.TopBarActionGroup
 import com.huydt.uikit.topbar.model.TopBarItemSize
 import androidx.compose.foundation.background
 import androidx.compose.ui.Alignment
@@ -29,8 +30,8 @@ fun TopBar(
     leftActions: List<TopBarItem> = emptyList(),
     midActions: List<TopBarItem> = emptyList(),
     rightActions: List<TopBarItem> = emptyList(),
-    moreActions: List<TopBarItem> = emptyList(),
-    itemSize: TopBarItemSize = TopBarItemSize.Medium,
+    moreActions: List<TopBarActionGroup> = emptyList(),
+    itemSize: TopBarItemSize = TopBarItemSize.MEDIUM,
     showLabel: Boolean = true,
     backgroundColor: androidx.compose.ui.graphics.Color =
         MaterialTheme.colorScheme.surface,
@@ -96,11 +97,12 @@ fun TopBar(
 
                     if (moreActions.isNotEmpty()) {
                         OverflowMenu(
-                            actions = moreActions,
+                            actionGroups = moreActions,
                             itemSize = itemSize,
                             showLabel = showLabel
                         )
                     }
+
                 }
             }
         }

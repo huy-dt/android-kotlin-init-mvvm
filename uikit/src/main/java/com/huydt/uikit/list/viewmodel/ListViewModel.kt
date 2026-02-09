@@ -40,6 +40,15 @@ open class ListViewModel<T>(
     /* =========================================================
      * Selection API
      * ========================================================= */
+    fun toggleSelectAll() {
+        val state = _uiState.value
+
+        if (state.isAllSelected) {
+            clearSelection()
+        } else {
+            selectAll()
+        }
+    }
 
     fun toggleSelection(item: T) {
         when (config.selectionMode) {

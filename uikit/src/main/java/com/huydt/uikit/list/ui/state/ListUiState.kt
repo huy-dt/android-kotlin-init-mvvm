@@ -9,4 +9,7 @@ data class ListUiState<T>(
     val isRefreshing get() = status is ListStatus.Refreshing
     val isLoadingMore get() = status is ListStatus.LoadingMore
     val isSelectionMode get() = selectedItems.isNotEmpty()
+    
+    val isAllSelected get() =
+        items.isNotEmpty() && selectedItems.size == items.size
 }

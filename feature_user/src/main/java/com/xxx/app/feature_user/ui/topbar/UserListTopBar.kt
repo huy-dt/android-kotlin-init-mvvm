@@ -1,19 +1,28 @@
 package com.xxx.app.feature_user.ui.topbar
 
 import androidx.compose.runtime.Composable
-import com.huydt.uikit.topbar.ui.TopBar
-import com.huydt.uikit.topbar.model.TopBarItem
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.ui.graphics.Color
+import com.huydt.uikit.topbar.model.TopBarItem
+import com.huydt.uikit.topbar.model.TopBarItemSize
+import com.huydt.uikit.topbar.model.TopBarActionGroup
+import com.huydt.uikit.topbar.ui.TopBar
 
 @Composable
 fun UserListTopBar(
     onBack: (() -> Unit)?,
     onRefresh: () -> Unit,
-    onSearchClick: (() -> Unit)? = null
+    onSearch: (() -> Unit)? = null,
+    onAdd: (() -> Unit)? = null,
+    onImport: (() -> Unit)? = null,
+    onExport: (() -> Unit)? = null,
+    onDeleteAll: (() -> Unit)? = null
 ) {
     TopBar(
         showLabel = false,
+
+        /* ---------------- LEFT ---------------- */
         leftActions = listOf(
             TopBarItem(
                 id = "back",
@@ -23,62 +32,87 @@ fun UserListTopBar(
             )
         ),
 
-        // 🔥 MID – nhiều item để vuốt
+        /* ---------------- MID (scrollable filters) ---------------- */
         midActions = listOf(
-            TopBarItem("user1", Icons.Default.Person, "User 1") {
-                println("User 1")
-            },
-            TopBarItem("user2", Icons.Default.Person, "User 2") {
-                println("User 2")
-            },
-            TopBarItem("star", Icons.Default.Star, "Star") {
-                println("Star")
-            },
-            TopBarItem("fav", Icons.Default.Favorite, "Fav") {
-                println("Favorite")
-            },
-            TopBarItem("info", Icons.Default.Info, "Info") {
-                println("Info")
-            },
-            TopBarItem("settings", Icons.Default.Settings, "Settings") {
-                println("Settings")
-            },
-            TopBarItem("more1", Icons.Default.MoreVert, "More 1") {
-                println("More 1")
-            },
-            TopBarItem("more2", Icons.Default.MoreVert, "More 2") {
-                println("More 2")
-            }
+            TopBarItem(
+                id = "filter",
+                icon = Icons.Default.FilterList,
+                label = "Filter"
+            ),
+            TopBarItem(
+                id = "sort",
+                icon = Icons.Default.Sort,
+                label = "Sort"
+            ),
+            TopBarItem(
+                id = "role",
+                icon = Icons.Default.Badge,
+                label = "Role"
+            ),
+            TopBarItem(
+                id = "status",
+                icon = Icons.Default.ToggleOn,
+                label = "Status"
+            )
         ),
 
+        /* ---------------- RIGHT ---------------- */
         rightActions = listOf(
             TopBarItem(
                 id = "search",
                 icon = Icons.Default.Search,
                 label = "Search",
-                onClick = onSearchClick
+                onClick = onSearch
             ),
             TopBarItem(
                 id = "refresh",
                 icon = Icons.Default.Refresh,
                 label = "Refresh",
                 onClick = onRefresh
+            ),
+            TopBarItem(
+                id = "add",
+                icon = Icons.Default.Add,
+                label = "Add",
+                onClick = onAdd
             )
         ),
 
-        // 🔥 OVERFLOW MENU
+        /* ---------------- OVERFLOW MENU (GROUPED) ---------------- */
         moreActions = listOf(
-            TopBarItem("more1", Icons.Default.MoreVert, "More 1") {
-                println("More 1")
-            },
-            TopBarItem("more1", Icons.Default.MoreVert, "More 1") {
-                println("More 1")
-            },
-            TopBarItem("more1", Icons.Default.MoreVert, "More 1") {
-                println("More 1")
-            },TopBarItem("more1", Icons.Default.MoreVert, "More 1") {
-                println("More 1")
-            }    
-        )
+
+            // Import / Export
+            TopBarActionGroup(
+                items = listOf(
+                    TopBarItem(
+                        id = "import",
+                        icon = Icons.Default.Upload,
+                        label = "Import",
+                        onClick = onImport
+                    ),
+                    TopBarItem(
+                        id = "export",
+                        icon = Icons.Default.Download,
+                        label = "Export",
+                        onClick = onExport
+                    )
+                )
+            ),
+
+            // Danger zone
+            TopBarActionGroup(
+                items = listOf(
+                    TopBarItem(
+                        id = "delete_all",
+                        icon = Icons.Default.DeleteForever,
+                        label = "Delete ALL",
+                        tint = Color.Red,
+                        onClick = onDeleteAll
+                    )
+                )
+            )
+        ),
+
+        itemSize = TopBarItemSize.MEDIUM
     )
 }

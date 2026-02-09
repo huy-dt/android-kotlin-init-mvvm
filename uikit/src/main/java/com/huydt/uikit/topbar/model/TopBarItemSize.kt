@@ -10,19 +10,19 @@ sealed class TopBarItemSize(
     val iconSize: Dp,
     val textSize: TextUnit
 ) {
-    object Small : TopBarItemSize(
+    object SMALL : TopBarItemSize(
         containerSize = 40.dp,
         iconSize = 18.dp,
         textSize = 12.sp
     )
 
-    object Medium : TopBarItemSize(
+    object MEDIUM : TopBarItemSize(
         containerSize = 48.dp,
         iconSize = 20.dp,
         textSize = 14.sp
     )
 
-    object Large : TopBarItemSize(
+    object LARGE : TopBarItemSize(
         containerSize = 56.dp,
         iconSize = 24.dp,
         textSize = 16.sp
