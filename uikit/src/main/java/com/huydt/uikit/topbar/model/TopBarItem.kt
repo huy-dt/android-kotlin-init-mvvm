@@ -1,13 +1,17 @@
 package com.huydt.uikit.topbar.model
 
-import androidx.compose.ui.graphics.Color
+import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.Color
 
+@Stable
 data class TopBarItem(
     val id: String,
-    val icon: ImageVector? = null,
+    val icon: ImageVector,
     val label: String? = null,
-    val tint: Color = Color.Unspecified,
+    val onClick: () -> Unit,
     val enabled: Boolean = true,
-    val onClick: (() -> Unit)? = null
+    val selected: Boolean = false,
+    val badgeCount: Int? = null,
+    val contentColor: Color? = null    // 👈 NEW
 )

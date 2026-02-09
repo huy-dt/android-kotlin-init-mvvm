@@ -1,13 +1,14 @@
 package com.xxx.app.feature_user.ui.topbar
 
-import androidx.compose.runtime.Composable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.ui.graphics.Color
+import androidx.compose.runtime.Composable
+import com.huydt.uikit.topbar.TopBar
+import com.huydt.uikit.topbar.model.TopBarActionGroup
 import com.huydt.uikit.topbar.model.TopBarItem
 import com.huydt.uikit.topbar.model.TopBarItemSize
-import com.huydt.uikit.topbar.model.TopBarActionGroup
-import com.huydt.uikit.topbar.ui.TopBar
+import com.huydt.uikit.topbar.TopBarDefaults
+import androidx.compose.ui.graphics.Color
 
 @Composable
 fun UserSelectionTopBar(
@@ -19,16 +20,19 @@ fun UserSelectionTopBar(
     onDeleteSelected: (() -> Unit)? = null,
     onExportSelected: (() -> Unit)? = null
 ) {
+
     TopBar(
         showLabel = true,
+        itemSize = TopBarItemSize.MEDIUM,
 
         /* ---------------- LEFT ---------------- */
         leftActions = listOf(
             TopBarItem(
-                id = "close",
+                id = "cancel",
                 icon = Icons.Default.Close,
                 label = "Cancel",
-                onClick = onCancelSelection
+                enabled = onCancelSelection != null,
+                onClick = { onCancelSelection?.invoke() }
             )
         ),
 
@@ -36,68 +40,87 @@ fun UserSelectionTopBar(
         midActions = listOf(
             TopBarItem(
                 id = "selected_count",
-                icon = null,
+                icon = Icons.Default.Check,
                 label = "$selectedCount selected",
-                onClick = null
+                enabled = false,          // display-only
+                onClick = {}              // no-op
             )
         ),
 
         /* ---------------- RIGHT ---------------- */
         rightActions = listOf(
             TopBarItem(
-                id = "select_all",
-                icon = if (isAllSelected)
-                    Icons.Default.ClearAll
-                else
-                    Icons.Default.SelectAll,
-                label = if (isAllSelected)
-                    "Clear selection"
-                else
-                    "Select all",
-                onClick = onToggleSelectAll
+                id = "toggle_all",
+                icon = Icons.Default.SelectAll,
+                label = "Select all",
+                enabled = onToggleSelectAll != null,
+                contentColor = if (isAllSelected) Color(0xFF2E7D32) else null,
+                onClick = { onToggleSelectAll?.invoke() }
             ),
+
             TopBarItem(
-                id = "delete",
+                id = "delete_selected",
                 icon = Icons.Default.Delete,
                 label = "Delete",
-                tint = Color.Red,
-                onClick = onDeleteSelected
+                enabled = true,
+                contentColor = TopBarDefaults.colors().content.copy(red = 0.9f),
+                onClick = { onDeleteSelected?.invoke() }
             )
         ),
 
         /* ---------------- OVERFLOW ---------------- */
         moreActions = listOf(
 
-            // CRUD
+            // ===== GROUP 1: MAIN ACTIONS =====
             TopBarActionGroup(
-                items = listOf(
+                id = "main_actions",
+                title = "Actions",
+                actions = listOf(
                     TopBarItem(
                         id = "edit",
                         icon = Icons.Default.Edit,
                         label = "Edit selected",
-                        onClick = onEditSelected
+                        onClick = { onEditSelected?.invoke() }
                     ),
-                    TopBarItem(
-                        id = "delete",
-                        icon = Icons.Default.Delete,
-                        label = "Delete selected",
-                        onClick = onDeleteSelected
-                    )
-                )
-            ),
-
-            TopBarActionGroup(
-                items = listOf(
                     TopBarItem(
                         id = "export",
                         icon = Icons.Default.Download,
                         label = "Export selected",
-                        onClick = onExportSelected
+                        onClick = { onExportSelected?.invoke() }
+                    )
+                )
+            ),
+
+            // ===== GROUP 2: SECONDARY =====
+            TopBarActionGroup(
+                id = "secondary_actions",
+                title = "More",
+                actions = listOf(
+                    TopBarItem(
+                        id = "duplicate",
+                        icon = Icons.Default.ContentCopy,
+                        label = "Duplicate",
+                        enabled = false,          // demo disabled
+                        onClick = {}
+                    )
+                )
+            ),
+
+            // ===== GROUP 3: DANGER ZONE =====
+            TopBarActionGroup(
+                id = "danger_zone",
+                // title = "Danger zone",
+                actions = listOf(
+                    TopBarItem(
+                        id = "delete",
+                        icon = Icons.Default.Delete,
+                        label = "Delete selected",
+                        contentColor = TopBarDefaults.colors().content.copy(red = 0.9f),
+                        onClick = { onDeleteSelected?.invoke() }
                     )
                 )
             )
-        ),
+        )
 
-        itemSize = TopBarItemSize.MEDIUM
     )
 }

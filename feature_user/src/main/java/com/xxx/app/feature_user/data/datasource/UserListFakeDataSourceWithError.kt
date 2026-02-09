@@ -22,8 +22,8 @@ class UserListFakeDataSourceWithError @Inject constructor() : UserListDataSource
     private var requestCount = 0
 
     // Cấu hình số lần lỗi / empty
-    private val errorUntil = 2   // 2 lần đầu lỗi mạng
-    private val emptyUntil = 4   // 2 lần tiếp theo empty
+    private val errorUntil = 1   // 2 lần đầu lỗi mạng
+    private val emptyUntil = 2   // 2 lần tiếp theo empty
 
     init {
         generateMockData()

@@ -1,29 +1,20 @@
-package com.huydt.uikit.topbar.ui
+package com.huydt.uikit.topbar
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.huydt.uikit.topbar.model.TopBarItem
+import androidx.compose.foundation.layout.statusBarsPadding
+import com.huydt.uikit.topbar.internal.OverflowMenu
+import com.huydt.uikit.topbar.internal.TopBarDivider
+import com.huydt.uikit.topbar.internal.TopBarItemView
 import com.huydt.uikit.topbar.model.TopBarActionGroup
+import com.huydt.uikit.topbar.model.TopBarItem
 import com.huydt.uikit.topbar.model.TopBarItemSize
-import androidx.compose.foundation.background
-import androidx.compose.ui.Alignment
-
-@Composable
-private fun TopBarDivider() {
-    Box(
-        modifier = Modifier
-            .fillMaxHeight()
-            .width(1.dp)
-            .padding(vertical = 8.dp)
-            .background(MaterialTheme.colorScheme.outlineVariant)
-    )
-}
 
 @Composable
 fun TopBar(
@@ -33,13 +24,12 @@ fun TopBar(
     moreActions: List<TopBarActionGroup> = emptyList(),
     itemSize: TopBarItemSize = TopBarItemSize.MEDIUM,
     showLabel: Boolean = true,
-    backgroundColor: androidx.compose.ui.graphics.Color =
-        MaterialTheme.colorScheme.surface,
-    tonalElevation: androidx.compose.ui.unit.Dp = 2.dp,
+    colors: TopBarColors = TopBarDefaults.colors(),
+    tonalElevation: androidx.compose.ui.unit.Dp = TopBarDefaults.tonalElevation,
     modifier: Modifier = Modifier
 ) {
     Surface(
-        color = backgroundColor,
+        color = colors.background,
         tonalElevation = tonalElevation
     ) {
         Row(
@@ -50,21 +40,20 @@ fun TopBar(
             verticalAlignment = Alignment.CenterVertically
         ) {
 
-            // --- LEFT ---
+            // LEFT
             if (leftActions.isNotEmpty()) {
                 Row {
                     leftActions.forEach {
-                        TopBarItemView(it, itemSize, showLabel)
+                        TopBarItemView(it, itemSize, showLabel, colors)
                     }
                 }
             }
 
-            // Divider: Left | Mid
             if (leftActions.isNotEmpty() && midActions.isNotEmpty()) {
-                TopBarDivider()
+                TopBarDivider(colors)
             }
 
-            // --- MID (scrollable) ---
+            // MID
             if (midActions.isNotEmpty()) {
                 LazyRow(
                     modifier = Modifier
@@ -73,39 +62,37 @@ fun TopBar(
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     items(midActions, key = { it.id }) {
-                        TopBarItemView(it, itemSize, showLabel)
+                        TopBarItemView(it, itemSize, showLabel, colors)
                     }
                 }
             } else {
                 Spacer(modifier = Modifier.weight(1f))
             }
 
-            // Divider: Mid | Right
             if (
-                (midActions.isNotEmpty() || leftActions.isNotEmpty()) &&
+                (leftActions.isNotEmpty() || midActions.isNotEmpty()) &&
                 (rightActions.isNotEmpty() || moreActions.isNotEmpty())
             ) {
-                TopBarDivider()
+                TopBarDivider(colors)
             }
 
-            // --- RIGHT + MORE ---
+            // RIGHT + MORE
             if (rightActions.isNotEmpty() || moreActions.isNotEmpty()) {
                 Row {
                     rightActions.forEach {
-                        TopBarItemView(it, itemSize, showLabel)
+                        TopBarItemView(it, itemSize, showLabel, colors)
                     }
 
                     if (moreActions.isNotEmpty()) {
                         OverflowMenu(
                             actionGroups = moreActions,
                             itemSize = itemSize,
-                            showLabel = showLabel
+                            showLabel = showLabel,
+                            colors = colors
                         )
                     }
-
                 }
             }
         }
     }
 }
-

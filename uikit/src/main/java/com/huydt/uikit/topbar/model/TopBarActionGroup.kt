@@ -1,5 +1,7 @@
 package com.huydt.uikit.topbar.model
 
 data class TopBarActionGroup(
-    val items: List<TopBarItem>
+    val id: String,
+    val title: String? = null,
+    val actions: List<TopBarItem>
 )

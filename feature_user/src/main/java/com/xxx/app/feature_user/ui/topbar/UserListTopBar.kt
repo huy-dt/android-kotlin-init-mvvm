@@ -3,11 +3,10 @@ package com.xxx.app.feature_user.ui.topbar
 import androidx.compose.runtime.Composable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.ui.graphics.Color
+import com.huydt.uikit.topbar.TopBar
+import com.huydt.uikit.topbar.model.TopBarActionGroup
 import com.huydt.uikit.topbar.model.TopBarItem
 import com.huydt.uikit.topbar.model.TopBarItemSize
-import com.huydt.uikit.topbar.model.TopBarActionGroup
-import com.huydt.uikit.topbar.ui.TopBar
 
 @Composable
 fun UserListTopBar(
@@ -19,8 +18,10 @@ fun UserListTopBar(
     onExport: (() -> Unit)? = null,
     onDeleteAll: (() -> Unit)? = null
 ) {
+
     TopBar(
-        showLabel = false,
+        itemSize = TopBarItemSize.MEDIUM,
+        showLabel = true,
 
         /* ---------------- LEFT ---------------- */
         leftActions = listOf(
@@ -28,31 +29,37 @@ fun UserListTopBar(
                 id = "back",
                 icon = Icons.Default.ArrowBack,
                 label = "Back",
-                onClick = onBack
+                enabled = onBack != null,
+                onClick = { onBack?.invoke() }
             )
         ),
 
-        /* ---------------- MID (scrollable filters) ---------------- */
+        /* ---------------- MID (tab-like filters) ---------------- */
         midActions = listOf(
             TopBarItem(
                 id = "filter",
                 icon = Icons.Default.FilterList,
-                label = "Filter"
+                label = "Filter",
+                selected = true,
+                onClick = {}
             ),
             TopBarItem(
                 id = "sort",
                 icon = Icons.Default.Sort,
-                label = "Sort"
+                label = "Sort",
+                onClick = {}
             ),
             TopBarItem(
                 id = "role",
                 icon = Icons.Default.Badge,
-                label = "Role"
+                label = "Role",
+                onClick = {}
             ),
             TopBarItem(
                 id = "status",
                 icon = Icons.Default.ToggleOn,
-                label = "Status"
+                label = "Status",
+                onClick = {}
             )
         ),
 
@@ -62,57 +69,54 @@ fun UserListTopBar(
                 id = "search",
                 icon = Icons.Default.Search,
                 label = "Search",
-                onClick = onSearch
+                enabled = onSearch != null,
+                onClick = { onSearch?.invoke() }
             ),
             TopBarItem(
                 id = "refresh",
                 icon = Icons.Default.Refresh,
                 label = "Refresh",
                 onClick = onRefresh
-            ),
-            TopBarItem(
-                id = "add",
-                icon = Icons.Default.Add,
-                label = "Add",
-                onClick = onAdd
             )
         ),
 
-        /* ---------------- OVERFLOW MENU (GROUPED) ---------------- */
+        /* ---------------- OVERFLOW ---------------- */
         moreActions = listOf(
 
-            // Import / Export
             TopBarActionGroup(
-                items = listOf(
+                id = "import_export",
+                // title = "Data",
+                actions = listOf(
                     TopBarItem(
                         id = "import",
                         icon = Icons.Default.Upload,
                         label = "Import",
-                        onClick = onImport
+                        enabled = onImport != null,
+                        onClick = { onImport?.invoke() }
                     ),
                     TopBarItem(
                         id = "export",
                         icon = Icons.Default.Download,
                         label = "Export",
-                        onClick = onExport
+                        enabled = onExport != null,
+                        onClick = { onExport?.invoke() }
                     )
                 )
             ),
 
-            // Danger zone
             TopBarActionGroup(
-                items = listOf(
+                id = "danger",
+                // title = "Danger zone",
+                actions = listOf(
                     TopBarItem(
                         id = "delete_all",
                         icon = Icons.Default.DeleteForever,
                         label = "Delete ALL",
-                        tint = Color.Red,
-                        onClick = onDeleteAll
+                        enabled = onDeleteAll != null,
+                        onClick = { onDeleteAll?.invoke() }
                     )
                 )
             )
-        ),
-
-        itemSize = TopBarItemSize.MEDIUM
+        )
     )
 }
