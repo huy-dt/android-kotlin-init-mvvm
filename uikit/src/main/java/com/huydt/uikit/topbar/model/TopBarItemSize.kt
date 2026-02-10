@@ -13,16 +13,16 @@ enum class TopBarItemSize(
     SMALL(
         containerSize = 40.dp,
         iconSize = 18.dp,
-        textSize = 12.sp
+        textSize = 9.sp
     ),
     MEDIUM(
         containerSize = 48.dp,
         iconSize = 20.dp,
-        textSize = 14.sp
+        textSize = 10.sp
     ),
     LARGE(
         containerSize = 56.dp,
         iconSize = 24.dp,
-        textSize = 16.sp
+        textSize = 12.sp
     )
 }

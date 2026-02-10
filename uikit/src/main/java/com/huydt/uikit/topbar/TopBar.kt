@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import com.huydt.uikit.topbar.internal.OverflowMenu
 import com.huydt.uikit.topbar.internal.TopBarDivider
 import com.huydt.uikit.topbar.internal.TopBarItemView
+import com.huydt.uikit.topbar.model.ItemColors
+import com.huydt.uikit.topbar.model.ItemColorDefaults
 import com.huydt.uikit.topbar.model.TopBarActionGroup
 import com.huydt.uikit.topbar.model.TopBarItem
 import com.huydt.uikit.topbar.model.TopBarItemSize
@@ -24,7 +26,7 @@ fun TopBar(
     moreActions: List<TopBarActionGroup> = emptyList(),
     itemSize: TopBarItemSize = TopBarItemSize.MEDIUM,
     showLabel: Boolean = true,
-    colors: TopBarColors = TopBarDefaults.colors(),
+    colors: ItemColors = ItemColorDefaults.colors(),
     tonalElevation: androidx.compose.ui.unit.Dp = TopBarDefaults.tonalElevation,
     modifier: Modifier = Modifier
 ) {
@@ -37,20 +39,21 @@ fun TopBar(
                 .fillMaxWidth()
                 .statusBarsPadding()
                 .height(itemSize.containerSize),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
         ) {
 
             // LEFT
             if (leftActions.isNotEmpty()) {
                 Row {
                     leftActions.forEach {
-                        TopBarItemView(it, itemSize, showLabel, colors)
+                        TopBarItemView(it, itemSize, showLabel)
                     }
                 }
             }
 
             if (leftActions.isNotEmpty() && midActions.isNotEmpty()) {
-                TopBarDivider(colors)
+                TopBarDivider(colors.background)
             }
 
             // MID
@@ -62,7 +65,7 @@ fun TopBar(
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     items(midActions, key = { it.id }) {
-                        TopBarItemView(it, itemSize, showLabel, colors)
+                        TopBarItemView(it, itemSize, showLabel)
                     }
                 }
             } else {
@@ -73,14 +76,14 @@ fun TopBar(
                 (leftActions.isNotEmpty() || midActions.isNotEmpty()) &&
                 (rightActions.isNotEmpty() || moreActions.isNotEmpty())
             ) {
-                TopBarDivider(colors)
+                TopBarDivider(colors.background)
             }
 
             // RIGHT + MORE
             if (rightActions.isNotEmpty() || moreActions.isNotEmpty()) {
                 Row {
                     rightActions.forEach {
-                        TopBarItemView(it, itemSize, showLabel, colors)
+                        TopBarItemView(it, itemSize, showLabel)
                     }
 
                     if (moreActions.isNotEmpty()) {

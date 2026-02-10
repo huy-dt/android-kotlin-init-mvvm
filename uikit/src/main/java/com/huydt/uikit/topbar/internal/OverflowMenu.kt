@@ -3,7 +3,7 @@ package com.huydt.uikit.topbar.internal
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.*
-import com.huydt.uikit.topbar.TopBarColors
+import com.huydt.uikit.topbar.model.ItemColors
 import com.huydt.uikit.topbar.model.TopBarActionGroup
 import com.huydt.uikit.topbar.model.TopBarItem
 import com.huydt.uikit.topbar.model.TopBarItemSize
@@ -13,7 +13,7 @@ internal fun OverflowMenu(
     actionGroups: List<TopBarActionGroup>,
     itemSize: TopBarItemSize,
     showLabel: Boolean,
-    colors: TopBarColors
+    colors: ItemColors
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -27,8 +27,7 @@ internal fun OverflowMenu(
     TopBarItemView(
         item = overflowItem,
         itemSize = itemSize,
-        showLabel = showLabel,
-        colors = colors
+        showLabel = showLabel
     )
 
     _OverflowMenu(

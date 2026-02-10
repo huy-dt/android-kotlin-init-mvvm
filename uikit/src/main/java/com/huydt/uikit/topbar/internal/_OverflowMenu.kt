@@ -10,7 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.huydt.uikit.topbar.TopBarColors
+import com.huydt.uikit.topbar.model.ItemColors
 import com.huydt.uikit.topbar.model.TopBarActionGroup
 
 @Composable
@@ -18,7 +18,7 @@ internal fun _OverflowMenu(
     expanded: Boolean,
     onDismiss: () -> Unit,
     actionGroups: List<TopBarActionGroup>,
-    colors: TopBarColors
+    colors: ItemColors
 ) {
     DropdownMenu(
         expanded = expanded,
@@ -44,8 +44,8 @@ internal fun _OverflowMenu(
                     !action.enabled ->
                         colors.content.copy(alpha = 0.38f)
 
-                    action.contentColor != null ->
-                        action.contentColor
+                    action.colors.content != null ->
+                        action.colors.content
 
                     action.selected ->
                         MaterialTheme.colorScheme.primary
@@ -62,11 +62,13 @@ internal fun _OverflowMenu(
                         )
                     },
                     leadingIcon = {
-                        Icon(
-                            imageVector = action.icon,
-                            contentDescription = action.label,
-                            tint = itemColor
-                        )
+                        action.icon?.let { icon ->
+                            Icon(
+                                imageVector = icon,
+                                contentDescription = action.label,
+                                tint = itemColor
+                            )
+                        }
                     },
                     enabled = action.enabled,
                     onClick = {
@@ -77,7 +79,7 @@ internal fun _OverflowMenu(
             }
 
             if (index < actionGroups.lastIndex) {
-                Divider(color = colors.divider)
+                Divider(color = colors.background)
             }
         }
     }

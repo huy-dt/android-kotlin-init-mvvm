@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import com.huydt.uikit.topbar.TopBar
 import com.huydt.uikit.topbar.model.TopBarActionGroup
 import com.huydt.uikit.topbar.model.TopBarItem
+import com.huydt.uikit.topbar.model.ItemColorDefaults
 import com.huydt.uikit.topbar.model.TopBarItemSize
 import com.huydt.uikit.topbar.TopBarDefaults
 import androidx.compose.ui.graphics.Color
@@ -40,7 +41,7 @@ fun UserSelectionTopBar(
         midActions = listOf(
             TopBarItem(
                 id = "selected_count",
-                icon = Icons.Default.Check,
+                // icon = Icons.Default.Check,
                 label = "$selectedCount selected",
                 enabled = false,          // display-only
                 onClick = {}              // no-op
@@ -53,8 +54,11 @@ fun UserSelectionTopBar(
                 id = "toggle_all",
                 icon = Icons.Default.SelectAll,
                 label = "Select all",
+                selected = true,
                 enabled = onToggleSelectAll != null,
-                contentColor = if (isAllSelected) Color(0xFF2E7D32) else null,
+                colors = ItemColorDefaults.colors(
+                    content = if (isAllSelected) Color(0xFF2E7D32) else Color.Unspecified
+                ),
                 onClick = { onToggleSelectAll?.invoke() }
             ),
 
@@ -63,7 +67,9 @@ fun UserSelectionTopBar(
                 icon = Icons.Default.Delete,
                 label = "Delete",
                 enabled = true,
-                contentColor = TopBarDefaults.colors().content.copy(red = 0.9f),
+                colors = ItemColorDefaults.colors(
+                    content = Color(0xFFE6E6E6) // ví dụ, hoặc màu bạn tự tính
+                ),
                 onClick = { onDeleteSelected?.invoke() }
             )
         ),
@@ -115,7 +121,9 @@ fun UserSelectionTopBar(
                         id = "delete",
                         icon = Icons.Default.Delete,
                         label = "Delete selected",
-                        contentColor = TopBarDefaults.colors().content.copy(red = 0.9f),
+                        colors = ItemColorDefaults.colors(
+                            content = Color(0xFFE6E6E6) // ví dụ, hoặc màu bạn tự tính
+                        ),
                         onClick = { onDeleteSelected?.invoke() }
                     )
                 )

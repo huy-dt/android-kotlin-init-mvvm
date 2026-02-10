@@ -6,6 +6,8 @@ import androidx.compose.material.icons.filled.*
 import com.huydt.uikit.topbar.TopBar
 import com.huydt.uikit.topbar.model.TopBarActionGroup
 import com.huydt.uikit.topbar.model.TopBarItem
+import androidx.compose.ui.graphics.Color
+import com.huydt.uikit.topbar.model.ItemColorDefaults
 import com.huydt.uikit.topbar.model.TopBarItemSize
 
 @Composable
@@ -22,6 +24,9 @@ fun UserListTopBar(
     TopBar(
         itemSize = TopBarItemSize.MEDIUM,
         showLabel = true,
+        colors = ItemColorDefaults.colors(
+            content = Color(0xFFE6E6E6) // ví dụ, hoặc màu bạn tự tính
+        ),
 
         /* ---------------- LEFT ---------------- */
         leftActions = listOf(
