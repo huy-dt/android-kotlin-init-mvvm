@@ -1,22 +1,29 @@
 package com.huydt.uikit.topbar.model
 
-import androidx.compose.runtime.Stable
+import androidx.compose.runtime.Immutable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 
-@Stable
+@Immutable
 data class TopBarItem(
     val id: String,
     val icon: ImageVector? = null,
     val label: String? = null,
-    val onClick: () -> Unit,
     val enabled: Boolean = true,
     val selected: Boolean = false,
     val badgeCount: Int? = null,
-    val colors: ItemColors = ItemColorDefaults.colors()
+    val colors: ItemColors = ItemColors(),
+    val onClick: () -> Unit = {}
 ) {
     init {
         require(icon != null || label != null) {
-            "TopBarItem must have at least icon or label"
+            "TopBarItem phải có ít nhất icon hoặc label"
         }
     }
 }
+
+@Immutable
+data class ItemColors(
+    val content: Color = Color.Unspecified,
+    val background: Color = Color.Transparent
+)

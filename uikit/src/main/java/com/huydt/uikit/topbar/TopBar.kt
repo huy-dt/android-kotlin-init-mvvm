@@ -1,23 +1,41 @@
 package com.huydt.uikit.topbar
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.layout.statusBarsPadding
 import com.huydt.uikit.topbar.internal.OverflowMenu
 import com.huydt.uikit.topbar.internal.TopBarDivider
 import com.huydt.uikit.topbar.internal.TopBarItemView
 import com.huydt.uikit.topbar.model.ItemColors
-import com.huydt.uikit.topbar.model.ItemColorDefaults
 import com.huydt.uikit.topbar.model.TopBarActionGroup
 import com.huydt.uikit.topbar.model.TopBarItem
 import com.huydt.uikit.topbar.model.TopBarItemSize
 
+/**
+ * TopBar component cho list data với support cho left/mid/right actions và overflow menu
+ *
+ * @param leftActions Danh sách actions bên trái (thường là back, menu)
+ * @param midActions Danh sách actions ở giữa (có thể scroll)
+ * @param rightActions Danh sách actions bên phải (thường là search, filter)
+ * @param moreActions Danh sách action groups trong overflow menu
+ * @param itemSize Kích thước của items
+ * @param showLabel Hiển thị label hay không
+ * @param colors Màu sắc cho TopBar
+ * @param tonalElevation Độ cao của surface
+ * @param modifier Modifier cho component
+ */
 @Composable
 fun TopBar(
     leftActions: List<TopBarItem> = emptyList(),
@@ -27,7 +45,7 @@ fun TopBar(
     itemSize: TopBarItemSize = TopBarItemSize.MEDIUM,
     showLabel: Boolean = true,
     colors: ItemColors = ItemColorDefaults.colors(),
-    tonalElevation: androidx.compose.ui.unit.Dp = TopBarDefaults.tonalElevation,
+    tonalElevation: Dp = TopBarDefaults.tonalElevation,
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -42,21 +60,25 @@ fun TopBar(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
-
-            // LEFT
+            // LEFT ACTIONS
             if (leftActions.isNotEmpty()) {
                 Row {
-                    leftActions.forEach {
-                        TopBarItemView(it, itemSize, showLabel)
+                    leftActions.forEach { item ->
+                        TopBarItemView(
+                            item = item,
+                            itemSize = itemSize,
+                            showLabel = showLabel
+                        )
                     }
                 }
             }
 
+            // Divider giữa LEFT và MID
             if (leftActions.isNotEmpty() && midActions.isNotEmpty()) {
                 TopBarDivider(colors.background)
             }
 
-            // MID
+            // MID ACTIONS (scrollable)
             if (midActions.isNotEmpty()) {
                 LazyRow(
                     modifier = Modifier
@@ -64,14 +86,22 @@ fun TopBar(
                         .padding(horizontal = 8.dp),
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    items(midActions, key = { it.id }) {
-                        TopBarItemView(it, itemSize, showLabel)
+                    items(
+                        items = midActions,
+                        key = { it.id }
+                    ) { item ->
+                        TopBarItemView(
+                            item = item,
+                            itemSize = itemSize,
+                            showLabel = showLabel
+                        )
                     }
                 }
             } else {
                 Spacer(modifier = Modifier.weight(1f))
             }
 
+            // Divider giữa MID và RIGHT
             if (
                 (leftActions.isNotEmpty() || midActions.isNotEmpty()) &&
                 (rightActions.isNotEmpty() || moreActions.isNotEmpty())
@@ -79,13 +109,17 @@ fun TopBar(
                 TopBarDivider(colors.background)
             }
 
-            // RIGHT + MORE
+            // RIGHT ACTIONS + OVERFLOW MENU
             if (rightActions.isNotEmpty() || moreActions.isNotEmpty()) {
                 Row {
-                    rightActions.forEach {
-                        TopBarItemView(it, itemSize, showLabel)
+                    rightActions.forEach { item ->
+                        TopBarItemView(
+                            item = item,
+                            itemSize = itemSize,
+                            showLabel = showLabel
+                        )
                     }
-
+                    
                     if (moreActions.isNotEmpty()) {
                         OverflowMenu(
                             actionGroups = moreActions,
@@ -98,4 +132,11 @@ fun TopBar(
             }
         }
     }
+}
+
+/**
+ * Default values cho TopBar
+ */
+object TopBarDefaults {
+    val tonalElevation: Dp = 3.dp
 }
