@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.dp
 import com.huydt.uikit.topbar.TopBar
 import com.huydt.uikit.topbar.model.TopBarActionGroup
 import com.huydt.uikit.topbar.model.TopBarItem
-import com.huydt.uikit.topbar.model.TopBarItemSize
+import com.huydt.uikit.icon.model.IconSize
 
 /**
  * Sample: Simple TopBar với Back và Search
@@ -341,7 +341,7 @@ fun DifferentSizesTopBarSample() {
                     onClick = { }
                 )
             ),
-            itemSize = TopBarItemSize.SMALL,
+            itemSize = IconSize.SMALL,
             showLabel = true
         )
 
@@ -355,7 +355,7 @@ fun DifferentSizesTopBarSample() {
                     onClick = { }
                 )
             ),
-            itemSize = TopBarItemSize.MEDIUM,
+            itemSize = IconSize.MEDIUM,
             showLabel = true
         )
 
@@ -369,7 +369,7 @@ fun DifferentSizesTopBarSample() {
                     onClick = { }
                 )
             ),
-            itemSize = TopBarItemSize.LARGE,
+            itemSize = IconSize.LARGE,
             showLabel = true
         )
     }

@@ -7,19 +7,44 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 /**
- * Định nghĩa kích thước cho Icon component
+ * Định nghĩa kích thước cho TopBarItem
  *
- * @param icon Kích thước của icon
- * @param label Kích thước font của label
+ * @param containerSize Chiều cao của container
+ * @param size Kích thước icon
+ * @param label Kích thước text
  */
 @Immutable
 data class IconSize(
-    val icon: Dp = 24.dp,
-    val label: TextUnit = 12.sp
+    val containerSize: Dp,
+    val icon: Dp,
+    val label: TextUnit
 ) {
     companion object {
-        val Small = IconSize(icon = 20.dp, label = 10.sp)
-        val Medium = IconSize(icon = 24.dp, label = 12.sp)
-        val Large = IconSize(icon = 32.dp, label = 14.sp)
+        /**
+         * Small size - compact topbar
+         */
+        val SMALL = IconSize(
+            containerSize = 48.dp,
+            icon = 20.dp,
+            label = 10.sp
+        )
+
+        /**
+         * Medium size - default
+         */
+        val MEDIUM = IconSize(
+            containerSize = 56.dp,
+            icon = 24.dp,
+            label = 12.sp
+        )
+
+        /**
+         * Large size - spacious topbar
+         */
+        val LARGE = IconSize(
+            containerSize = 64.dp,
+            icon = 28.dp,
+            label = 14.sp
+        )
     }
 }

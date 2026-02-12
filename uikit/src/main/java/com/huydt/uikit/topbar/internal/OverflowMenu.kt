@@ -21,9 +21,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.huydt.uikit.icon.AppIcon
 import com.huydt.uikit.icon.model.*
-import com.huydt.uikit.topbar.model.ItemColors
 import com.huydt.uikit.topbar.model.TopBarActionGroup
-import com.huydt.uikit.topbar.model.TopBarItemSize
+import com.huydt.uikit.topbar.model.TopBarItem
 
 /**
  * Overflow menu component hiển thị "More" button và dropdown menu
@@ -36,27 +35,23 @@ import com.huydt.uikit.topbar.model.TopBarItemSize
 @Composable
 internal fun OverflowMenu(
     actionGroups: List<TopBarActionGroup>,
-    itemSize: TopBarItemSize,
+    itemSize: IconSize,
     showLabel: Boolean,
-    colors: ItemColors
+    colors: IconColors
 ) {
     var expanded by remember { mutableStateOf(false) }
 
     // More button
-    AppIcon(
-        modifier = Modifier.padding(horizontal = 6.dp),
-        icon = Icons.Default.MoreVert,
-        label = if (showLabel) "More" else null,
-        size = IconSize(
-            icon = itemSize.iconSize,
-            label = itemSize.textSize
+    TopBarItemView(
+        item = TopBarItem(
+            id = "more",
+            icon = Icons.Default.MoreVert,
+            label = "More",
+            onClick = { expanded = true }
         ),
-        colors = IconColors(
-            color = colors.content,
-            background = Color.Transparent
-        ),
-        onClick = { expanded = true },
-        contentPadding = 4.dp
+        colors = colors,
+        itemSize = itemSize,
+        showLabel = showLabel
     )
 
     // Dropdown menu
@@ -85,10 +80,7 @@ internal fun OverflowMenu(
                         .padding(horizontal = 8.dp, vertical = 4.dp),
                     icon = item.icon,
                     label = item.label,
-                    size = IconSize(
-                        icon = 20.dp,
-                        label = 14.sp
-                    ),
+                    size = itemSize,
                     colors = IconColors(
                         color = if (item.enabled) {
                             MaterialTheme.colorScheme.onSurface
@@ -100,7 +92,7 @@ internal fun OverflowMenu(
                     enabled = item.enabled,
                     badgeCount = item.badgeCount,
                     onClick = {
-                        item.onClick()
+                        item.onClick?.invoke() // Thêm ?.invoke() nếu có thể null
                         expanded = false
                     },
                     contentPadding = 8.dp

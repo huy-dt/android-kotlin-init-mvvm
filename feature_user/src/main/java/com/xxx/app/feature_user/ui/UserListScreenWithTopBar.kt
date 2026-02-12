@@ -1,8 +1,10 @@
 package com.xxx.app.feature_user.ui
 
-import androidx.compose.material3.Scaffold
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.xxx.app.feature_user.ui.topbar.UserListTopBar
 import com.xxx.app.feature_user.ui.topbar.UserSelectionTopBar
@@ -15,26 +17,26 @@ fun ListUserScreenWithTopBar(
 ) {
     val uiState by vm.uiState.collectAsStateWithLifecycle()
 
-    Scaffold(
-        topBar = {
-            if (uiState.isSelectionMode) {
-                UserSelectionTopBar(
-                    selectedCount = uiState.selectedItems.size,
-                    isAllSelected = uiState.selectedItems.size == uiState.items.size,
-                    onCancelSelection = vm::clearSelection,
-                    onToggleSelectAll = vm::toggleSelectAll
-                )
-            } else {
-                UserListTopBar(
-                    onBack = onBack,
-                    onRefresh = vm::refresh
-                )
-            }
+    Column(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        if (uiState.isSelectionMode) {
+            UserSelectionTopBar(
+                selectedCount = uiState.selectedItems.size,
+                isAllSelected = uiState.selectedItems.size == uiState.items.size,
+                onCancelSelection = vm::clearSelection,
+                onToggleSelectAll = vm::toggleSelectAll
+            )
+        } else {
+            UserListTopBar(
+                onBack = onBack,
+                onRefresh = vm::refresh
+            )
         }
-    ) { padding ->
+
         _ListUserScreen(
             vm = vm,
-            contentPadding = padding
+            modifier = Modifier.weight(1f)
         )
     }
 }

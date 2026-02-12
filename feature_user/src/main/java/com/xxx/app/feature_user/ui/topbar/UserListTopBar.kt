@@ -14,10 +14,10 @@ import androidx.compose.material.icons.filled.Upload
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import com.huydt.uikit.topbar.TopBar
-import com.huydt.uikit.topbar.ItemColorDefaults
+import com.huydt.uikit.topbar.IconColorDefaults
 import com.huydt.uikit.topbar.model.TopBarActionGroup
 import com.huydt.uikit.topbar.model.TopBarItem
-import com.huydt.uikit.topbar.model.TopBarItemSize
+import com.huydt.uikit.icon.model.IconSize
 
 /**
  * TopBar cho User List screen
@@ -40,11 +40,13 @@ fun UserListTopBar(
     onExport: (() -> Unit)? = null,
     onDeleteAll: (() -> Unit)? = null
 ) {
+
     TopBar(
-        itemSize = TopBarItemSize.MEDIUM,
+        itemSize = IconSize.SMALL,
         showLabel = true,
-        colors = ItemColorDefaults.colors(
-            content = Color(0xFFE6E6E6)
+        colors = IconColorDefaults.colors(
+            color = Color(0xFFE6E6E6),
+            // background = Color.White
         ),
 
         /* ---------------- LEFT ---------------- */
@@ -119,26 +121,23 @@ fun UserListTopBar(
                 id = "import_export",
                 title = "Data Management", // Optional title
                 items = buildList {
-                    if (onImport != null) {
-                        add(
-                            TopBarItem(
-                                id = "import",
-                                icon = Icons.Default.Upload,
-                                label = "Import",
-                                onClick = onImport
-                            )
+                    add(
+                        TopBarItem(
+                            id = "import",
+                            icon = Icons.Default.Upload,
+                            label = "Import",
+                            onClick = onImport
                         )
-                    }
-                    if (onExport != null) {
-                        add(
-                            TopBarItem(
-                                id = "export",
-                                icon = Icons.Default.Download,
-                                label = "Export",
-                                onClick = onExport
-                            )
+                    )
+                    add(
+                        TopBarItem(
+                            id = "export",
+                            icon = Icons.Default.Download,
+                            label = "Export",
+                            onClick = onExport
                         )
-                    }
+                    )
+                
                 }
             ),
 
@@ -147,16 +146,14 @@ fun UserListTopBar(
                 id = "danger",
                 title = "Danger Zone", // Optional title
                 items = buildList {
-                    if (onDeleteAll != null) {
-                        add(
-                            TopBarItem(
-                                id = "delete_all",
-                                icon = Icons.Default.DeleteForever,
-                                label = "Delete All",
-                                onClick = onDeleteAll
-                            )
+                    add(
+                        TopBarItem(
+                            id = "delete_all",
+                            icon = Icons.Default.DeleteForever,
+                            label = "Delete All",
+                            onClick = onDeleteAll
                         )
-                    }
+                    )
                 }
             )
         ).filter { it.items.isNotEmpty() } // Chỉ giữ groups có items

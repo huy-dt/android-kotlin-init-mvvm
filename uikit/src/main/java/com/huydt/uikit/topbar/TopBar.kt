@@ -18,10 +18,10 @@ import androidx.compose.ui.unit.dp
 import com.huydt.uikit.topbar.internal.OverflowMenu
 import com.huydt.uikit.topbar.internal.TopBarDivider
 import com.huydt.uikit.topbar.internal.TopBarItemView
-import com.huydt.uikit.topbar.model.ItemColors
 import com.huydt.uikit.topbar.model.TopBarActionGroup
 import com.huydt.uikit.topbar.model.TopBarItem
-import com.huydt.uikit.topbar.model.TopBarItemSize
+import com.huydt.uikit.icon.model.IconSize
+import com.huydt.uikit.icon.model.IconColors
 
 /**
  * TopBar component cho list data với support cho left/mid/right actions và overflow menu
@@ -42,9 +42,9 @@ fun TopBar(
     midActions: List<TopBarItem> = emptyList(),
     rightActions: List<TopBarItem> = emptyList(),
     moreActions: List<TopBarActionGroup> = emptyList(),
-    itemSize: TopBarItemSize = TopBarItemSize.MEDIUM,
+    itemSize: IconSize = IconSize.MEDIUM,
     showLabel: Boolean = true,
-    colors: ItemColors = ItemColorDefaults.colors(),
+    colors: IconColors = IconColorDefaults.colors(),
     tonalElevation: Dp = TopBarDefaults.tonalElevation,
     modifier: Modifier = Modifier
 ) {
@@ -67,6 +67,7 @@ fun TopBar(
                         TopBarItemView(
                             item = item,
                             itemSize = itemSize,
+                            colors = colors,
                             showLabel = showLabel
                         )
                     }
@@ -93,6 +94,7 @@ fun TopBar(
                         TopBarItemView(
                             item = item,
                             itemSize = itemSize,
+                            colors = colors,
                             showLabel = showLabel
                         )
                     }
@@ -116,6 +118,7 @@ fun TopBar(
                         TopBarItemView(
                             item = item,
                             itemSize = itemSize,
+                            colors = colors,
                             showLabel = showLabel
                         )
                     }

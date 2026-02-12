@@ -11,7 +11,9 @@ import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -19,7 +21,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.huydt.uikit.list.ui.components.*
 import com.huydt.uikit.list.ui.state.ListStatus
-// import com.huydt.uikit.list.ui.swipe.SwipeActionItem
 import com.huydt.uikit.list.viewmodel.ListViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -27,7 +28,6 @@ import com.huydt.uikit.list.viewmodel.ListViewModel
 fun <T> UiKitListView(
     vm: ListViewModel<T>,
     modifier: Modifier = Modifier,
-    contentPadding: PaddingValues = PaddingValues(0.dp),
     itemContent: @Composable (T, Boolean) -> Unit
 ) {
     val uiState by vm.uiState.collectAsStateWithLifecycle()
@@ -100,8 +100,9 @@ fun <T> UiKitListView(
         }
     }
 
-    Box(modifier = modifier.fillMaxSize()
-        .padding(contentPadding)
+    Box(modifier = modifier
+        .fillMaxSize()
+        .clip(RectangleShape)
         .nestedScroll(pullState.nestedScrollConnection)
     ) {
         when {

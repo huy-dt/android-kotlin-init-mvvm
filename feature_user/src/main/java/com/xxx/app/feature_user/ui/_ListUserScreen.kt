@@ -12,12 +12,11 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun _ListUserScreen(
     vm: UserListViewModel = hiltViewModel(),
-    contentPadding: PaddingValues = PaddingValues(0.dp)
+    modifier: Modifier = Modifier
 ) {
     UiKitListView(
         vm = vm,
-        contentPadding = contentPadding,
-        modifier = Modifier
+        modifier = modifier
     ) { user, isSelected ->
         UserItem(
             user = user,

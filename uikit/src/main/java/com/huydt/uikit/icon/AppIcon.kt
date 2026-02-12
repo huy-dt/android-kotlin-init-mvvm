@@ -17,6 +17,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -47,14 +48,14 @@ fun AppIcon(
     modifier: Modifier = Modifier,
     icon: ImageVector? = null,
     label: String? = null,
-    size: IconSize = IconSize.Medium,
+    size: IconSize = IconSize.MEDIUM,
     colors: IconColors = IconColors(),
     enabled: Boolean = true,
     selected: Boolean = false,
     badgeCount: Int? = null,
     badgeConfig: BadgeConfig = BadgeConfig.Default,
     onClick: (() -> Unit)? = null,
-    shape: Shape = CircleShape,
+    shape: Shape = RectangleShape,
     contentPadding: Dp = 8.dp,
     spacing: Dp = 2.dp,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() }

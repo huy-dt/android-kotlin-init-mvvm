@@ -16,7 +16,6 @@ import androidx.compose.ui.unit.dp
 import com.huydt.uikit.icon.AppIcon
 import com.huydt.uikit.icon.model.*
 import com.huydt.uikit.topbar.model.TopBarItem
-import com.huydt.uikit.topbar.model.TopBarItemSize
 
 /**
  * Internal component để render một TopBarItem sử dụng AppIcon
@@ -28,45 +27,27 @@ import com.huydt.uikit.topbar.model.TopBarItemSize
 @Composable
 internal fun TopBarItemView(
     item: TopBarItem,
-    itemSize: TopBarItemSize,
+    colors: IconColors,
+    itemSize: IconSize,
     showLabel: Boolean
 ) {
     val primaryColor = MaterialTheme.colorScheme.primary
-    
-    // Tính toán màu sắc dựa trên trạng thái
-    val iconColor = when {
-        !item.enabled -> item.colors.content.copy(alpha = 0.38f)
-        item.selected -> primaryColor
-        else -> item.colors.content
-    }
-
-    // Background color cho selected state
-    val backgroundColor = when {
-        item.selected -> primaryColor.copy(alpha = 0.12f)
-        else -> item.colors.background
-    }
 
     Column(
         modifier = Modifier
-            .height(itemSize.containerSize)
-            .background(backgroundColor),
+            .height(itemSize.containerSize),
+            // .background(backgroundColor),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // AppIcon với tất cả states
         AppIcon(
             modifier = Modifier
                 .weight(1f)
-                .padding(horizontal = 6.dp),
+                .padding(start = 2.dp),
             icon = item.icon,
             label = if (showLabel) item.label else null,
-            size = IconSize(
-                icon = itemSize.iconSize,
-                label = itemSize.textSize
-            ),
-            colors = IconColors(
-                color = iconColor,
-                background = Color.Transparent
-            ),
+            size = itemSize,
+            colors = item.colors ?: colors,
             enabled = item.enabled,
             selected = item.selected,
             badgeCount = item.badgeCount,

@@ -4,6 +4,8 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 
+import com.huydt.uikit.icon.model.IconColors
+
 @Immutable
 data class TopBarItem(
     val id: String,
@@ -12,8 +14,8 @@ data class TopBarItem(
     val enabled: Boolean = true,
     val selected: Boolean = false,
     val badgeCount: Int? = null,
-    val colors: ItemColors = ItemColors(),
-    val onClick: () -> Unit = {}
+    val colors: IconColors? = null,
+    val onClick: (() -> Unit)? = null
 ) {
     init {
         require(icon != null || label != null) {
@@ -23,7 +25,7 @@ data class TopBarItem(
 }
 
 @Immutable
-data class ItemColors(
+data class IconColors(
     val content: Color = Color.Unspecified,
     val background: Color = Color.Transparent
 )

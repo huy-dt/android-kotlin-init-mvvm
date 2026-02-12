@@ -55,7 +55,7 @@ class UserListViewModel @Inject constructor(
                     AppIcon(
                         icon = Icons.Default.Edit,
                         label = "Edit",
-                        size = IconSize.Small,
+                        size = IconSize.SMALL,
                         colors = IconColors(
                             color = Color.White,
                             background = Color(0xFF2196F3) // Blue
@@ -72,7 +72,7 @@ class UserListViewModel @Inject constructor(
                     AppIcon(
                         icon = Icons.Default.Delete,
                         label = "Delete",
-                        size = IconSize.Small,
+                        size = IconSize.SMALL,
                         colors = IconColors(
                             color = Color.White,
                             background = Color.Red

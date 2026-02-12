@@ -1,19 +1,14 @@
 package com.xxx.app.feature_user.ui.topbar
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.SelectAll
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import com.huydt.uikit.topbar.TopBar
-import com.huydt.uikit.topbar.ItemColorDefaults
+import com.huydt.uikit.topbar.IconColorDefaults
 import com.huydt.uikit.topbar.model.TopBarActionGroup
 import com.huydt.uikit.topbar.model.TopBarItem
-import com.huydt.uikit.topbar.model.TopBarItemSize
+import com.huydt.uikit.icon.model.IconSize
 
 @Composable
 fun UserSelectionTopBar(
@@ -25,104 +20,89 @@ fun UserSelectionTopBar(
     onDeleteSelected: (() -> Unit)? = null,
     onExportSelected: (() -> Unit)? = null
 ) {
+    // Khai báo màu chung cho toàn bộ TopBar
+    val defaultColors = IconColorDefaults.colors(
+        // color = Color(0xFFE6E6E6),
+        // background = Color.White
+    )
 
     TopBar(
         showLabel = true,
-        itemSize = TopBarItemSize.MEDIUM,
+        itemSize = IconSize.SMALL,
+        colors = defaultColors,
 
-        /* ---------------- LEFT ---------------- */
+        /* ---------------- LEFT: Nút đóng/hủy ---------------- */
         leftActions = buildList {
-            if (onCancelSelection != null) {
+            onCancelSelection?.let {
                 add(
                     TopBarItem(
                         id = "cancel",
                         icon = Icons.Default.Close,
                         label = "Cancel",
-                        onClick = onCancelSelection
+                        onClick = it
                     )
                 )
             }
         },
 
-        /* ---------------- MID ---------------- */
+        /* ---------------- MID: Hiển thị số lượng ---------------- */
         midActions = listOf(
             TopBarItem(
                 id = "selected_count",
                 label = "$selectedCount selected",
                 enabled = false,
-                onClick = {} // display-only
+                onClick = {} 
             )
         ),
 
-        /* ---------------- RIGHT ---------------- */
+        /* ---------------- RIGHT: Các thao tác nhanh ---------------- */
         rightActions = buildList {
-
-            if (onToggleSelectAll != null) {
+            onToggleSelectAll?.let {
                 add(
                     TopBarItem(
                         id = "toggle_all",
                         icon = Icons.Default.SelectAll,
                         label = "Select all",
                         selected = isAllSelected,
-                        colors = ItemColorDefaults.colors(
-                            content = if (isAllSelected)
-                                Color(0xFF2E7D32)
-                            else
-                                Color.Unspecified
+                        // Fix: Nếu không chọn thì dùng màu default của bar
+                        colors = defaultColors.copy(
+                            color = if (isAllSelected) Color(0xFF2E7D32) else defaultColors.color
                         ),
-                        onClick = onToggleSelectAll
+                        onClick = it
                     )
                 )
             }
 
-            if (onDeleteSelected != null) {
+            onDeleteSelected?.let {
                 add(
                     TopBarItem(
                         id = "delete_selected",
                         icon = Icons.Default.Delete,
                         label = "Delete",
-                        colors = ItemColorDefaults.colors(
-                            content = Color(0xFFE6E6E6)
-                        ),
-                        onClick = onDeleteSelected
+                        colors = defaultColors.copy(color = Color(0xFFE6E6E6)),
+                        onClick = it
                     )
                 )
             }
         },
 
-        /* ---------------- OVERFLOW ---------------- */
+        /* ---------------- OVERFLOW: Các thao tác bổ sung ---------------- */
         moreActions = listOf(
-
-            // ===== GROUP 1: MAIN ACTIONS =====
+            // GROUP 1: Chỉnh sửa & Xuất bản
             TopBarActionGroup(
                 id = "main_actions",
                 title = "Actions",
                 items = buildList {
-                    if (onEditSelected != null) {
-                        add(
-                            TopBarItem(
-                                id = "edit",
-                                icon = Icons.Default.Edit,
-                                label = "Edit selected",
-                                onClick = onEditSelected
-                            )
-                        )
+                    onEditSelected?.let {
+                        add(TopBarItem(id = "edit", icon = Icons.Default.Edit, label = "Edit", onClick = it))
                     }
-
-                    if (onExportSelected != null) {
-                        add(
-                            TopBarItem(
-                                id = "export",
-                                icon = Icons.Default.Download,
-                                label = "Export selected",
-                                onClick = onExportSelected
-                            )
-                        )
+                    onExportSelected?.let {
+                        add(TopBarItem(id = "export", icon = Icons.Default.Download, label = "Export", onClick = it))
                     }
                 }
             ),
 
-            // ===== GROUP 2: SECONDARY =====
+            // GROUP 2: Các thao tác phụ
             TopBarActionGroup(
                 id = "secondary_actions",
                 title = "More",
@@ -131,32 +111,31 @@ fun UserSelectionTopBar(
                         id = "duplicate",
                         icon = Icons.Default.ContentCopy,
                         label = "Duplicate",
-                        enabled = false,
+                        enabled = false, // Hiện tại chưa support
                         onClick = {}
                     )
                 )
             ),
 
-            // ===== GROUP 3: DANGER ZONE =====
+            // GROUP 3: Vùng nguy hiểm
             TopBarActionGroup(
                 id = "danger_zone",
                 title = "Danger Zone",
                 items = buildList {
-                    if (onDeleteSelected != null) {
+                    onDeleteSelected?.let {
                         add(
                             TopBarItem(
                                 id = "delete",
                                 icon = Icons.Default.Delete,
-                                label = "Delete selected",
-                                colors = ItemColorDefaults.colors(
-                                    content = Color(0xFFE6E6E6)
-                                ),
-                                onClick = onDeleteSelected
+                                label = "Delete all",
+                                // FIX: Sửa lỗi copy.copy thành defaultColors.copy
+                                colors = defaultColors.copy(color = Color(0xFFD32F2F)), // Đổi sang màu đỏ cho đúng tính chất Danger
+                                onClick = it
                             )
                         )
                     }
                 }
             )
-        ).filter { it.items.isNotEmpty() } // Giữ lại group có items
+        ).filter { it.items.isNotEmpty() }
     )
 }
