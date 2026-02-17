@@ -9,6 +9,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.xxx.app.feature_user.ui.topbar.UserListTopBar
 import com.xxx.app.feature_user.ui.topbar.UserSelectionTopBar
 import com.xxx.app.feature_user.ui.viewmodel.UserListViewModel
+import androidx.compose.foundation.background
+import androidx.compose.ui.graphics.Color
 
 @Composable
 fun ListUserScreenWithTopBar(
@@ -18,7 +20,9 @@ fun ListUserScreenWithTopBar(
     val uiState by vm.uiState.collectAsStateWithLifecycle()
 
     Column(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
     ) {
         if (uiState.isSelectionMode) {
             UserSelectionTopBar(

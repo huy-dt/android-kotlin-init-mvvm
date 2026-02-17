@@ -46,12 +46,13 @@ internal fun OverflowMenu(
         item = TopBarItem(
             id = "more",
             icon = Icons.Default.MoreVert,
-            label = "More",
-            onClick = { expanded = true }
+            label = "More"
         ),
         colors = colors,
         itemSize = itemSize,
-        showLabel = showLabel
+        showLabel = showLabel,
+        onItemClick = { expanded = true },
+        selected = false
     )
 
     // Dropdown menu
@@ -59,7 +60,7 @@ internal fun OverflowMenu(
         expanded = expanded,
         onDismissRequest = { expanded = false },
         modifier = Modifier
-            .width(200.dp)
+            // .width(200.dp)
             .background(MaterialTheme.colorScheme.surface)
     ) {
         actionGroups.forEachIndexed { groupIndex, group ->
@@ -69,18 +70,17 @@ internal fun OverflowMenu(
                     text = title,
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    modifier = Modifier.padding(horizontal = 8.dp)
                 )
             }
 
             // Group items
             group.items.forEach { item ->
                 AppIcon(
-                    modifier = Modifier
-                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                    isVertical = false,
                     icon = item.icon,
                     label = item.label,
-                    size = itemSize,
+                    size = IconSize.MEDIUM,
                     colors = IconColors(
                         color = if (item.enabled) {
                             MaterialTheme.colorScheme.onSurface

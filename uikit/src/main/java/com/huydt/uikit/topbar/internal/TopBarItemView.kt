@@ -17,54 +17,26 @@ import com.huydt.uikit.icon.AppIcon
 import com.huydt.uikit.icon.model.*
 import com.huydt.uikit.topbar.model.TopBarItem
 
-/**
- * Internal component để render một TopBarItem sử dụng AppIcon
- *
- * @param item TopBarItem data
- * @param itemSize Kích thước của item
- * @param showLabel Hiển thị label hay không
- */
 @Composable
 internal fun TopBarItemView(
     item: TopBarItem,
     colors: IconColors,
     itemSize: IconSize,
-    showLabel: Boolean
+    showLabel: Boolean,
+    selected: Boolean = false,
+    onItemClick: (TopBarItem) -> Unit
 ) {
-    val primaryColor = MaterialTheme.colorScheme.primary
-
-    Column(
-        modifier = Modifier
-            .height(itemSize.containerSize),
-            // .background(backgroundColor),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        // AppIcon với tất cả states
-        AppIcon(
-            modifier = Modifier
-                .weight(1f)
-                .padding(start = 2.dp),
-            icon = item.icon,
-            label = if (showLabel) item.label else null,
-            size = itemSize,
-            colors = item.colors ?: colors,
-            enabled = item.enabled,
-            selected = item.selected,
-            badgeCount = item.badgeCount,
-            onClick = item.onClick,
-            contentPadding = 4.dp,
-            spacing = 2.dp
-        )
-
-        // Selection indicator
-        if (item.selected) {
-            Spacer(modifier = Modifier.height(2.dp))
-            Box(
-                modifier = Modifier
-                    .height(2.dp)
-                    .width(16.dp)
-                    .background(primaryColor)
-            )
-        }
-    }
+    AppIcon(
+        icon = item.icon,
+        label = if (showLabel) item.label else null,
+        size = itemSize,
+        colors = item.colors ?: colors,
+        enabled = item.enabled,
+        selected = selected,
+        showIndicator = selected,
+        badgeCount = item.badgeCount,
+        onClick = { onItemClick(item) },
+        contentPadding = 4.dp,
+        spacing = 2.dp
+    )
 }

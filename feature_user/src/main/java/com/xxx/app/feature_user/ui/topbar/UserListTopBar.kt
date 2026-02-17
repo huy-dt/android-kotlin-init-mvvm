@@ -13,6 +13,8 @@ import androidx.compose.material.icons.filled.ToggleOn
 import androidx.compose.material.icons.filled.Upload
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.runtime.*
+
 import com.huydt.uikit.topbar.TopBar
 import com.huydt.uikit.topbar.IconColorDefaults
 import com.huydt.uikit.topbar.model.TopBarActionGroup
@@ -41,54 +43,56 @@ fun UserListTopBar(
     onDeleteAll: (() -> Unit)? = null
 ) {
 
+    var selectedId by remember { mutableStateOf<String?>(null) }
+    var badge by remember { mutableStateOf(5) }
+
     TopBar(
+        selectedId = selectedId,                // 🔥 QUAN TRỌNG
+        onItemSelected = { item ->              // 🔥 QUAN TRỌNG
+            selectedId = item.id
+        },
+
         itemSize = IconSize.SMALL,
         showLabel = true,
-        colors = IconColorDefaults.colors(
-            color = Color(0xFFE6E6E6),
-            // background = Color.White
-        ),
+        colors = IconColorDefaults.colors(),
 
         /* ---------------- LEFT ---------------- */
         leftActions = buildList {
-            if (onBack != null) {
-                add(
-                    TopBarItem(
-                        id = "back",
-                        icon = Icons.Default.ArrowBack,
-                        label = "Back",
-                        onClick = onBack
-                    )
+            add(
+                TopBarItem(
+                    id = "back",
+                    icon = Icons.Default.ArrowBack,
+                    label = "Back",
+                    onClick = onBack
                 )
-            }
+            )
         },
 
-        /* ---------------- MID (tab-like filters) ---------------- */
+        /* ---------------- MID ---------------- */
         midActions = listOf(
             TopBarItem(
                 id = "filter",
                 icon = Icons.Default.FilterList,
                 label = "Filter",
-                selected = true,
-                onClick = { /* Handle filter */ }
+                badgeCount = badge,
+                onClick = {
+                    badge = 0
+                }
             ),
             TopBarItem(
                 id = "sort",
                 icon = Icons.Default.Sort,
-                label = "Sort",
-                onClick = { /* Handle sort */ }
+                label = "Sort"
             ),
             TopBarItem(
                 id = "role",
                 icon = Icons.Default.Badge,
-                label = "Role",
-                onClick = { /* Handle role filter */ }
+                label = "Role"
             ),
             TopBarItem(
                 id = "status",
                 icon = Icons.Default.ToggleOn,
-                label = "Status",
-                onClick = { /* Handle status filter */ }
+                label = "Status"
             )
         ),
 
@@ -116,10 +120,9 @@ fun UserListTopBar(
 
         /* ---------------- OVERFLOW ---------------- */
         moreActions = listOf(
-            // Import/Export group
             TopBarActionGroup(
                 id = "import_export",
-                title = "Data Management", // Optional title
+                title = "Data Management",
                 items = buildList {
                     add(
                         TopBarItem(
@@ -137,14 +140,11 @@ fun UserListTopBar(
                             onClick = onExport
                         )
                     )
-                
                 }
             ),
-
-            // Danger zone group
             TopBarActionGroup(
                 id = "danger",
-                title = "Danger Zone", // Optional title
+                title = "Danger Zone",
                 items = buildList {
                     add(
                         TopBarItem(
@@ -156,6 +156,6 @@ fun UserListTopBar(
                     )
                 }
             )
-        ).filter { it.items.isNotEmpty() } // Chỉ giữ groups có items
+        )
     )
 }

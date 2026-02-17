@@ -8,7 +8,7 @@ import com.huydt.uikit.icon.model.IconColors
 object IconColorDefaults { // Đổi tên từ ItemColorDefaults thành IconColorDefaults
     @Composable
     fun colors(
-        color: Color = Color.White,
-        background: Color = Color.Red
+        color: Color = Color.Black,
+        background: Color = Color.Transparent
     ): IconColors = IconColors(color = color, background = background)
 }
