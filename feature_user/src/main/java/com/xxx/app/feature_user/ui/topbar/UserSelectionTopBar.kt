@@ -27,10 +27,6 @@ fun UserSelectionTopBar(
     )
 
     TopBar(
-        selectedId = null,
-        onItemSelected = {
-
-        },
         showLabel = true,
         itemSize = IconSize.SMALL,
         colors = defaultColors,

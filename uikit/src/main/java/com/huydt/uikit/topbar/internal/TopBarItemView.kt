@@ -24,7 +24,7 @@ internal fun TopBarItemView(
     itemSize: IconSize,
     showLabel: Boolean,
     selected: Boolean = false,
-    onItemClick: (TopBarItem) -> Unit
+    onItemClick: ((TopBarItem) -> Unit)? = null
 ) {
     AppIcon(
         icon = item.icon,
@@ -33,9 +33,9 @@ internal fun TopBarItemView(
         colors = item.colors ?: colors,
         enabled = item.enabled,
         selected = selected,
-        showIndicator = selected,
+        showIndicator = false,
         badgeCount = item.badgeCount,
-        onClick = { onItemClick(item) },
+        onClick = { onItemClick?.invoke(item) },
         contentPadding = 4.dp,
         spacing = 2.dp
     )

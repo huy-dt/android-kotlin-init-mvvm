@@ -43,15 +43,7 @@ fun UserListTopBar(
     onDeleteAll: (() -> Unit)? = null
 ) {
 
-    var selectedId by remember { mutableStateOf<String?>(null) }
-    var badge by remember { mutableStateOf(5) }
-
     TopBar(
-        selectedId = selectedId,                // 🔥 QUAN TRỌNG
-        onItemSelected = { item ->              // 🔥 QUAN TRỌNG
-            selectedId = item.id
-        },
-
         itemSize = IconSize.SMALL,
         showLabel = true,
         colors = IconColorDefaults.colors(),
@@ -74,10 +66,7 @@ fun UserListTopBar(
                 id = "filter",
                 icon = Icons.Default.FilterList,
                 label = "Filter",
-                badgeCount = badge,
-                onClick = {
-                    badge = 0
-                }
+                badgeCount = 4
             ),
             TopBarItem(
                 id = "sort",

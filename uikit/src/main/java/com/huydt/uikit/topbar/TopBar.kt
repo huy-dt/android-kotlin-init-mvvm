@@ -9,6 +9,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.runtime.*
+
 import com.huydt.uikit.topbar.internal.OverflowMenu
 import com.huydt.uikit.topbar.internal.TopBarDivider
 import com.huydt.uikit.topbar.internal.TopBarItemView
@@ -23,14 +25,14 @@ fun TopBar(
     midActions: List<TopBarItem> = emptyList(),
     rightActions: List<TopBarItem> = emptyList(),
     moreActions: List<TopBarActionGroup> = emptyList(),
-    selectedId: String?,                        // 🔥 hoisted state
-    onItemSelected: (TopBarItem) -> Unit,       // 🔥 callback
     itemSize: IconSize = IconSize.MEDIUM,
     showLabel: Boolean = true,
     colors: IconColors = IconColorDefaults.colors(),
     tonalElevation: Dp = TopBarDefaults.tonalElevation,
     modifier: Modifier = Modifier
 ) {
+
+    var selectedId by remember { mutableStateOf<String?>(null) }
 
     Surface(
         color = colors.background,
@@ -41,11 +43,10 @@ fun TopBar(
                 .fillMaxWidth()
                 .statusBarsPadding()
                 .height(itemSize.containerSize),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Start
+            verticalAlignment = Alignment.CenterVertically
         ) {
 
-            // ===== LEFT ACTIONS =====
+            // ===== LEFT =====
             if (leftActions.isNotEmpty()) {
                 Row {
                     leftActions.forEach { item ->
@@ -63,12 +64,11 @@ fun TopBar(
                 }
             }
 
-            // Divider LEFT - MID
             if (leftActions.isNotEmpty() && midActions.isNotEmpty()) {
                 TopBarDivider(colors.background)
             }
 
-            // ===== MID ACTIONS (Scrollable) =====
+            // ===== MID =====
             if (midActions.isNotEmpty()) {
                 LazyRow(
                     modifier = Modifier
@@ -76,10 +76,7 @@ fun TopBar(
                         .padding(horizontal = 8.dp),
                     horizontalArrangement = Arrangement.spacedBy(1.dp)
                 ) {
-                    items(
-                        items = midActions,
-                        key = { it.id }
-                    ) { item ->
+                    items(midActions, key = { it.id }) { item ->
 
                         val isSelected = item.id == selectedId
 
@@ -90,7 +87,7 @@ fun TopBar(
                             colors = colors,
                             showLabel = showLabel,
                             onItemClick = { clicked ->
-                                onItemSelected(clicked)
+                                selectedId = clicked.id
                                 clicked.onClick?.invoke()
                             }
                         )
@@ -100,7 +97,6 @@ fun TopBar(
                 Spacer(modifier = Modifier.weight(1f))
             }
 
-            // Divider MID - RIGHT
             if (
                 (leftActions.isNotEmpty() || midActions.isNotEmpty()) &&
                 (rightActions.isNotEmpty() || moreActions.isNotEmpty())
@@ -108,7 +104,7 @@ fun TopBar(
                 TopBarDivider(colors.background)
             }
 
-            // ===== RIGHT ACTIONS =====
+            // ===== RIGHT =====
             if (rightActions.isNotEmpty() || moreActions.isNotEmpty()) {
                 Row {
                     rightActions.forEach { item ->
@@ -124,7 +120,6 @@ fun TopBar(
                         )
                     }
 
-                    // ===== OVERFLOW =====
                     if (moreActions.isNotEmpty()) {
                         OverflowMenu(
                             actionGroups = moreActions,
