@@ -61,7 +61,8 @@ fun <T> UiKitListView(
     // Auto load lần đầu
     LaunchedEffect(uiState.items) {
         if (uiState.items.isEmpty() &&
-            uiState.pagingState is PagingState.Init
+            ( uiState.pagingState is PagingState.Init || 
+              uiState.pagingState is PagingState.Idle )
         ) {
             vm.load()
         }

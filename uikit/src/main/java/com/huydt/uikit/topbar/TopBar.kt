@@ -113,7 +113,10 @@ fun TopBar(
 
             // ===== RIGHT =====
             if (rightActions.isNotEmpty() || moreActions.isNotEmpty()) {
-                Row {
+                Row(
+                    modifier = Modifier.wrapContentWidth(Alignment.End),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     rightActions.forEach { item ->
                         TopBarItemView(
                             item = item,

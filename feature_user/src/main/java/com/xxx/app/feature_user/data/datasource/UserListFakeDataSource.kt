@@ -43,7 +43,7 @@ class UserListFakeDataSource @Inject constructor(
         pageSize: Int,
         query: String?
     ): List<UserDto> {
-        delay(800) // Giả lập lag mạng để test Loading Shimmer/Indicator
+        delay(300) // Giả lập lag mạng để test Loading Shimmer/Indicator
 
         val filtered = if (!query.isNullOrBlank()) {
             users.filter {
@@ -68,7 +68,7 @@ class UserListFakeDataSource @Inject constructor(
     }
 
     override suspend fun remove(item: UserDto) {
-        delay(300)
+        // delay(300)
         users.removeIf { it.id == item.id }
     }
 }
