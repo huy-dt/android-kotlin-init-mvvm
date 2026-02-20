@@ -27,6 +27,7 @@ open class ListViewModel<T>(
         SwipeActions()
 
     private var page = 0
+    private var runtimeTotalCount: Int? = null
     private var currentQuery: String? = null
     private var searchJob: Job? = null
     private var loadJob: Job? = null
@@ -73,6 +74,18 @@ open class ListViewModel<T>(
     fun selectAll() {
         if (config.selectionMode != SelectionMode.MULTI) return
         setSelection(_uiState.value.items.toSet())
+    }
+
+    private fun tryLoadIfEmpty() {
+        val state = _uiState.value
+
+        if (state.items.isEmpty() &&
+            state.canLoadMore &&
+            state.pagingState is PagingState.Idle &&
+            state.mutationState is MutationState.Idle
+        ) {
+            refresh()
+        }
     }
 
     protected fun setSelection(items: Set<T>) {
@@ -132,6 +145,7 @@ open class ListViewModel<T>(
                 selectedItems = it.selectedItems - removed
             )
         }
+        tryLoadIfEmpty()
     }
 
     protected fun clearItems() {
@@ -141,6 +155,11 @@ open class ListViewModel<T>(
                 selectedItems = emptySet()
             )
         }
+        tryLoadIfEmpty()
+    }
+
+    protected fun resetPaging() {
+        page = 0
     }
 
     /* =========================================================
@@ -163,21 +182,38 @@ open class ListViewModel<T>(
             }
 
             resetPaging()
+            runtimeTotalCount = null
 
             if (config.clearOnRefresh) {
                 clearItems()
             }
 
             try {
-                val data = repository.getItems(page, config.pageSize, currentQuery)
+                // ==== 2 MODE LOGIC ====
+                val paged = repository.getPagedItems(page, config.pageSize, currentQuery)
+
+                val data: List<T>
+
+                if (paged != null) {
+                    data = paged.items
+                    runtimeTotalCount = paged.totalCount
+                } else {
+                    data = repository.getItems(page, config.pageSize, currentQuery)
+                }
 
                 if (data.isNotEmpty()) page++
 
                 _uiState.update {
+                    val canLoad = when {
+                        !config.enableLoadMore -> false
+                        runtimeTotalCount != null -> data.size < runtimeTotalCount!!
+                        else -> data.size == config.pageSize
+                    }
+
                     it.copy(
                         items = data,
                         pagingState = PagingState.Idle,
-                        canLoadMore = config.enableLoadMore && data.size == config.pageSize
+                        canLoadMore = canLoad
                     )
                 }
 
@@ -212,15 +248,33 @@ open class ListViewModel<T>(
             }
 
             try {
-                val more = repository.getItems(page, config.pageSize, currentQuery)
+                // ==== 2 MODE LOGIC ====
+                val paged = repository.getPagedItems(page, config.pageSize, currentQuery)
+
+                val more: List<T>
+
+                if (paged != null) {
+                    more = paged.items
+                    runtimeTotalCount = paged.totalCount
+                } else {
+                    more = repository.getItems(page, config.pageSize, currentQuery)
+                }
 
                 if (more.isNotEmpty()) page++
 
                 _uiState.update {
+                    val newItems = it.items + more
+
+                    val canLoad = when {
+                        !config.enableLoadMore -> false
+                        runtimeTotalCount != null -> newItems.size < runtimeTotalCount!!
+                        else -> more.size == config.pageSize
+                    }
+
                     it.copy(
-                        items = it.items + more,
+                        items = newItems,
                         pagingState = PagingState.Idle,
-                        canLoadMore = more.size == config.pageSize
+                        canLoadMore = canLoad
                     )
                 }
 
@@ -242,10 +296,6 @@ open class ListViewModel<T>(
             delay(500)
             refresh()
         }
-    }
-
-    protected fun resetPaging() {
-        page = 0
     }
 
     fun load() = refresh()

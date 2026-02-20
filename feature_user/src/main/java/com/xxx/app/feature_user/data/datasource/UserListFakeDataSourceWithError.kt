@@ -2,6 +2,7 @@ package com.xxx.app.feature_user.data.datasource
 
 import com.xxx.app.core.domain.model.Role
 import com.xxx.app.feature_user.domain.model.UserDto
+import com.huydt.uikit.list.data.result.PagedResult
 import kotlinx.coroutines.delay
 import java.util.Collections
 import javax.inject.Inject
@@ -59,8 +60,6 @@ class UserListFakeDataSourceWithError @Inject constructor() : UserListDataSource
             requestCount++
         }
 
-        delay(800) // giả lập lag mạng
-
         // 1️⃣ Giả lập lỗi mạng
         if (requestCount <= errorUntil) {
             throw FakeNetworkException()
@@ -86,13 +85,31 @@ class UserListFakeDataSourceWithError @Inject constructor() : UserListDataSource
         return filtered.drop(start).take(pageSize)
     }
 
+    override suspend fun getPagedItems(
+        page: Int,
+        pageSize: Int,
+        query: String?
+    ): PagedResult<UserDto> {
+        
+        delay(300) // giả lập lag mạng
+
+        val items = getItems(page, pageSize, query)
+
+        val totalCount = users.size
+
+        return PagedResult(
+            items = items,
+            totalCount = totalCount
+        )
+    }
+
     override suspend fun add(item: UserDto) {
         delay(300)
         users.add(0, item)
     }
 
     override suspend fun remove(item: UserDto) {
-        delay(300)
+        // delay(300)
         users.removeIf { it.id == item.id }
     }
 }
