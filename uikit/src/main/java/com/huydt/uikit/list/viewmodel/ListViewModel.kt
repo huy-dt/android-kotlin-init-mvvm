@@ -1,20 +1,14 @@
 package com.huydt.uikit.list.viewmodel
 
-import com.huydt.uikit.list.config.*
-import com.huydt.uikit.list.ui.state.*
-import com.huydt.uikit.list.ui.swipe.*
-import com.huydt.uikit.list.data.ListRepository
-
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.update
+import com.huydt.uikit.list.config.*
+import com.huydt.uikit.list.data.ListRepository
+import com.huydt.uikit.list.ui.state.*
+import com.huydt.uikit.list.ui.swipe.*
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.*
 
 open class ListViewModel<T>(
     private val repository: ListRepository<T>,
@@ -22,6 +16,7 @@ open class ListViewModel<T>(
 ) : ViewModel() {
 
     /* ------------ State ------------ */
+
     private val _scrollToTop = Channel<Unit>(Channel.BUFFERED)
     val scrollToTop = _scrollToTop.receiveAsFlow()
 
@@ -34,20 +29,16 @@ open class ListViewModel<T>(
     private var page = 0
     private var currentQuery: String? = null
     private var searchJob: Job? = null
-
     private var loadJob: Job? = null
 
     /* =========================================================
-     * Selection API
+     * Selection API (GIỮ NGUYÊN)
      * ========================================================= */
+
     fun toggleSelectAll() {
         val state = _uiState.value
-
-        if (state.isAllSelected) {
-            clearSelection()
-        } else {
-            selectAll()
-        }
+        if (state.isAllSelected) clearSelection()
+        else selectAll()
     }
 
     fun toggleSelection(item: T) {
@@ -95,7 +86,7 @@ open class ListViewModel<T>(
     }
 
     /* =========================================================
-     * Data mutation API (CHO FEATURE VM DÙNG)
+     * Data mutation API (GIỮ NGUYÊN 100%)
      * ========================================================= */
 
     protected fun setItems(items: List<T>) {
@@ -153,46 +144,51 @@ open class ListViewModel<T>(
     }
 
     /* =========================================================
-     * Paging / Query
+     * Paging / Query (CHUYỂN SANG pagingState)
      * ========================================================= */
 
     fun refresh() {
         if (!config.enableRefresh) return
-        
-        // Nếu đang refresh rồi thì bỏ qua, nhưng nếu đang LoadMore thì sẽ Cancel LoadMore để Refresh
-        if (_uiState.value.status is ListStatus.Refreshing) return
+        if (_uiState.value.pagingState is PagingState.Refreshing) return
 
-        // QUAN TRỌNG: Hủy bất kỳ tiến trình load nào đang chạy (bao gồm LoadMore)
         loadJob?.cancel()
 
         loadJob = viewModelScope.launch {
+
             _uiState.update {
-                it.copy(status = ListStatus.Refreshing, selectedItems = emptySet())
+                it.copy(
+                    pagingState = PagingState.Refreshing,
+                    selectedItems = emptySet()
+                )
             }
+
             resetPaging()
 
-            if(config.clearOnRefresh)
+            if (config.clearOnRefresh) {
                 clearItems()
+            }
 
             try {
                 val data = repository.getItems(page, config.pageSize, currentQuery)
-                page++
-                
+
+                if (data.isNotEmpty()) page++
+
                 _uiState.update {
                     it.copy(
                         items = data,
-                        status = ListStatus.Idle,
+                        pagingState = PagingState.Idle,
                         canLoadMore = config.enableLoadMore && data.size == config.pageSize
                     )
                 }
-                
-                _scrollToTop.send(Unit) 
 
+                _scrollToTop.send(Unit)
+
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
-                // Kiểm tra nếu lỗi không phải do bị Cancel Job chủ động
                 _uiState.update {
                     it.copy(
-                        status = ListStatus.Error(e.message ?: "Unknown Error"),
+                        pagingState = PagingState.Error(e.message ?: "Unknown Error"),
                         canLoadMore = false
                     )
                 }
@@ -202,25 +198,38 @@ open class ListViewModel<T>(
 
     fun loadMore() {
         val state = _uiState.value
-        // Chặn LoadMore nếu không rảnh (Status không phải Idle)
-        if (!config.enableLoadMore || !state.canLoadMore || state.status !is ListStatus.Idle) return
 
-        // Gán vào loadJob để refresh() có thể cancel nó
+        if (!config.enableLoadMore ||
+            !state.canLoadMore ||
+            state.pagingState !is PagingState.Idle ||
+            state.mutationState !is MutationState.Idle
+        ) return
+
         loadJob = viewModelScope.launch {
-            _uiState.update { it.copy(status = ListStatus.LoadingMore) }
+
+            _uiState.update {
+                it.copy(pagingState = PagingState.LoadingMore)
+            }
+
             try {
                 val more = repository.getItems(page, config.pageSize, currentQuery)
-                page++
-                
+
+                if (more.isNotEmpty()) page++
+
                 _uiState.update {
                     it.copy(
                         items = it.items + more,
-                        status = ListStatus.Idle,
+                        pagingState = PagingState.Idle,
                         canLoadMore = more.size == config.pageSize
                     )
                 }
+
+            } catch (e: CancellationException) {
+                throw e
             } catch (_: Exception) {
-                _uiState.update { it.copy(status = ListStatus.Idle) }
+                _uiState.update {
+                    it.copy(pagingState = PagingState.Idle)
+                }
             }
         }
     }
@@ -228,6 +237,7 @@ open class ListViewModel<T>(
     fun search(query: String) {
         currentQuery = query
         searchJob?.cancel()
+
         searchJob = viewModelScope.launch {
             delay(500)
             refresh()
