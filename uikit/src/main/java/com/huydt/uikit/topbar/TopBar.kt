@@ -9,15 +9,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.runtime.*
-
+import com.huydt.uikit.icon.model.IconColors
+import com.huydt.uikit.icon.model.IconSize
 import com.huydt.uikit.topbar.internal.OverflowMenu
 import com.huydt.uikit.topbar.internal.TopBarDivider
 import com.huydt.uikit.topbar.internal.TopBarItemView
 import com.huydt.uikit.topbar.model.TopBarActionGroup
 import com.huydt.uikit.topbar.model.TopBarItem
-import com.huydt.uikit.icon.model.IconSize
-import com.huydt.uikit.icon.model.IconColors
 
 @Composable
 fun TopBar(
@@ -25,14 +23,17 @@ fun TopBar(
     midActions: List<TopBarItem> = emptyList(),
     rightActions: List<TopBarItem> = emptyList(),
     moreActions: List<TopBarActionGroup> = emptyList(),
+
+    // 🔥 Hoisted state
+    selectedId: String? = null,
+    onSelectedChange: (String?) -> Unit = {},
+
     itemSize: IconSize = IconSize.MEDIUM,
     showLabel: Boolean = true,
     colors: IconColors = IconColorDefaults.colors(),
     tonalElevation: Dp = TopBarDefaults.tonalElevation,
     modifier: Modifier = Modifier
 ) {
-
-    var selectedId by remember { mutableStateOf<String?>(null) }
 
     Surface(
         color = colors.background,
@@ -50,7 +51,6 @@ fun TopBar(
             if (leftActions.isNotEmpty()) {
                 Row {
                     leftActions.forEach { item ->
-
                         TopBarItemView(
                             item = item,
                             itemSize = itemSize,
@@ -76,7 +76,10 @@ fun TopBar(
                         .padding(horizontal = 8.dp),
                     horizontalArrangement = Arrangement.spacedBy(1.dp)
                 ) {
-                    items(midActions, key = { it.id }) { item ->
+                    items(
+                        items = midActions,
+                        key = { it.id }
+                    ) { item ->
 
                         val isSelected = item.id == selectedId
 
@@ -87,7 +90,11 @@ fun TopBar(
                             colors = colors,
                             showLabel = showLabel,
                             onItemClick = { clicked ->
-                                selectedId = clicked.id
+                                val newId =
+                                    if (selectedId == clicked.id) null
+                                    else clicked.id
+
+                                onSelectedChange(newId)
                                 clicked.onClick?.invoke()
                             }
                         )
@@ -108,7 +115,6 @@ fun TopBar(
             if (rightActions.isNotEmpty() || moreActions.isNotEmpty()) {
                 Row {
                     rightActions.forEach { item ->
-
                         TopBarItemView(
                             item = item,
                             itemSize = itemSize,

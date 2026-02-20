@@ -19,85 +19,112 @@ fun ListUserScreenWithTopBar(
     onBack: (() -> Unit)?,
     vm: UserListViewModel
 ) {
-    val uiState        by vm.uiState.collectAsStateWithLifecycle()
-    val topBarMode     by vm.topBarMode.collectAsStateWithLifecycle()
-    val searchQuery    by vm.searchQuery.collectAsStateWithLifecycle()
-    val filterGroups   by vm.activeFilterGroups.collectAsStateWithLifecycle()
-    val filterBadge    by vm.activeFilterCount.collectAsStateWithLifecycle()
-    val sortState      by vm.sortState.collectAsStateWithLifecycle()
+    val uiState      by vm.uiState.collectAsStateWithLifecycle()
+    val topBarMode   by vm.topBarMode.collectAsStateWithLifecycle()
+    val searchQuery  by vm.searchQuery.collectAsStateWithLifecycle()
+    val filterGroups by vm.activeFilterGroups.collectAsStateWithLifecycle()
+    val filterBadge  by vm.activeFilterCount.collectAsStateWithLifecycle()
+    val sortState    by vm.sortState.collectAsStateWithLifecycle()
+
+    // 🔥 Derive selectedId từ mode
+    val selectedId = when (topBarMode) {
+        TopBarMode.SEARCH -> "search"
+        TopBarMode.FILTER -> "filter"
+        TopBarMode.SORT   -> "sort"
+        else -> null
+    }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
     ) {
-        // ── TopBar layer ──
-        when {
-            // 1. Selection mode — ưu tiên cao nhất
-            uiState.isSelectionMode -> {
-                ListSelectionTopBar(
-                    selectedCount = uiState.selectedItems.size,
-                    isAllSelected = uiState.isAllSelected,
-                    onCancelSelection = vm::clearSelection,
-                    onToggleSelectAll = vm::toggleSelectAll.takeIf {
-                        vm.selectionMode == SelectionMode.MULTI
-                    },
-                    onDeleteSelected = vm::deleteSelected,
-                    onExportSelected = vm::exportSelected
-                )
-            }
 
-            // 2. Search bar inline
-            topBarMode == TopBarMode.SEARCH -> {
-                InlineSearchBar(
-                    query = searchQuery,
-                    onQueryChange = vm::onSearchQueryChange,
-                    onClose = {
-                        vm.clearSearch()
-                        vm.closeBar()
+        // 1️⃣ TopBar
+        if (uiState.isSelectionMode) {
+
+            ListSelectionTopBar(
+                selectedCount = uiState.selectedItems.size,
+                isAllSelected = uiState.isAllSelected,
+                onCancelSelection = vm::clearSelection,
+                onToggleSelectAll = vm::toggleSelectAll.takeIf {
+                    vm.selectionMode == SelectionMode.MULTI
+                },
+                onDeleteSelected = vm::deleteSelected,
+                onExportSelected = vm::exportSelected
+            )
+
+        } else {
+
+            ListTopBar(
+                filterBadge = filterBadge,
+
+                // 👇 Sync với TopBarMode
+                selectedId = selectedId,
+                onSelectedChange = { id ->
+                    when (id) {
+                        "search" -> vm.openSearch()
+                        "filter" -> vm.openFilter()
+                        "sort"   -> vm.openSort()
+                        null     -> vm.closeBar()
                     }
-                )
-            }
+                },
 
-            // 3. Filter bar inline
-            topBarMode == TopBarMode.FILTER -> {
-                InlineFilterBar(
-                    groups = filterGroups,
-                    onSelect = vm::onFilterSelect,
-                    onClearAll = vm::clearAllFilters,
-                    onClose = vm::closeBar
-                )
-            }
+                onBack = onBack,
+                onRefresh = vm::refresh,
+                onSearch = vm::openSearch,
+                onFilter = vm::openFilter,
+                onSort = vm::openSort,
+                onImport = vm::importData,
+                onExport = vm::exportAll,
+                onDeleteAll = vm::deleteAll
+            )
+        }
 
-            // 4. Sort bar inline
-            topBarMode == TopBarMode.SORT -> {
-                InlineSortBar(
-                    options = vm.sortOptions,
-                    sortState = sortState,
-                    onSelect = vm::onSortSelect,
-                    onToggleDir = vm::onToggleSortDirection,
-                    onClear = vm::clearSort,
-                    onClose = vm::closeBar
-                )
-            }
+        // 2️⃣ Inline bar
+        AnimatedVisibility(
+            visible = topBarMode != TopBarMode.NORMAL,
+            enter = expandVertically() + fadeIn(),
+            exit = shrinkVertically() + fadeOut()
+        ) {
+            when (topBarMode) {
 
-            // 5. Normal topbar
-            else -> {
-                ListTopBar(
-                    filterBadge = filterBadge,
-                    onBack = onBack,
-                    onRefresh = vm::refresh,
-                    onSearch = vm::openSearch,
-                    onFilter = vm::openFilter,
-                    onSort = vm::openSort,
-                    onImport = vm::importData,
-                    onExport = vm::exportAll,
-                    onDeleteAll = vm::deleteAll
-                )
+                TopBarMode.SEARCH -> {
+                    InlineSearchBar(
+                        query = searchQuery,
+                        onQueryChange = vm::onSearchQueryChange,
+                        onClose = {
+                            vm.clearSearch()
+                            vm.closeBar()
+                        }
+                    )
+                }
+
+                TopBarMode.FILTER -> {
+                    InlineFilterBar(
+                        groups = filterGroups,
+                        onSelect = vm::onFilterSelect,
+                        onClearAll = vm::clearAllFilters,
+                        onClose = vm::closeBar
+                    )
+                }
+
+                TopBarMode.SORT -> {
+                    InlineSortBar(
+                        options = vm.sortOptions,
+                        sortState = sortState,
+                        onSelect = vm::onSortSelect,
+                        onToggleDir = vm::onToggleSortDirection,
+                        onClear = vm::clearSort,
+                        onClose = vm::closeBar
+                    )
+                }
+
+                else -> Unit
             }
         }
 
-        // ── Content ──
+        // 3️⃣ Content
         _ListUserScreen(
             vm = vm,
             modifier = Modifier.weight(1f)
