@@ -2,6 +2,7 @@ package com.xxx.app.feature_user.data.datasource
 
 import com.xxx.app.core.domain.model.Role
 import com.xxx.app.feature_user.domain.model.UserDto
+import com.huydt.uikit.list.data.SortOption
 import com.huydt.uikit.list.data.result.PagedResult
 import kotlinx.coroutines.delay
 import java.util.Collections
@@ -9,98 +10,84 @@ import javax.inject.Inject
 
 /**
  * Fake datasource dùng để test:
- * - Loading
- * - Error (internet)
- * - Empty state
- * - Retry / Pull to refresh
+ * - Loading / Error / Empty / Retry / Pull to refresh
  */
 class UserListFakeDataSourceWithError @Inject constructor() : UserListDataSource {
 
-    // Thread-safe list
     private val users = Collections.synchronizedList(mutableListOf<UserDto>())
-
-    // Đếm số lần gọi API (giả lập refresh)
     private var requestCount = 0
+    private val errorUntil = 1
+    private val emptyUntil = 2
 
-    // Cấu hình số lần lỗi / empty
-    private val errorUntil = 1   // 2 lần đầu lỗi mạng
-    private val emptyUntil = 2   // 2 lần tiếp theo empty
-
-    init {
-        generateMockData()
-    }
+    init { generateMockData() }
 
     private fun generateMockData() {
         val roles = listOf(Role.ADMIN, Role.STAFF, Role.CUSTOMER)
-        val mockUsers = (1..50).map { i ->
+        users.addAll((1..50).map { i ->
             UserDto(
                 id = i.toLong(),
                 username = when (i) {
-                    1 -> "admin"
-                    2 -> "staff01"
-                    3 -> "customer01"
+                    1 -> "admin"; 2 -> "staff01"; 3 -> "customer01"
                     else -> "user_test_$i"
                 },
                 password = "password123",
                 email = "user$i@example.com",
-                role = roles[i % roles.size]
+                role = roles[i % roles.size],
             )
-        }
-        users.addAll(mockUsers)
+        })
     }
 
     override suspend fun getItems(
         page: Int,
         pageSize: Int,
-        query: String?
+        query: String?,
+        sortOption: SortOption?,
+        filters: Map<String, Any>,
     ): List<UserDto> {
+        if (page == 0) requestCount++
+        if (requestCount <= errorUntil) throw FakeNetworkException()
+        if (requestCount <= emptyUntil) return emptyList()
 
-        // Reset state khi load lại từ đầu (pull refresh)
-        if (page == 0) {
-            requestCount++
-        }
+        // 1. Query
+        var result = if (!query.isNullOrBlank())
+            users.filter { it.username.contains(query, ignoreCase = true) }
+        else users.toList()
 
-        // 1️⃣ Giả lập lỗi mạng
-        if (requestCount <= errorUntil) {
-            throw FakeNetworkException()
-        }
-
-        // 2️⃣ Giả lập empty
-        if (requestCount <= emptyUntil) {
-            return emptyList()
-        }
-
-        // 3️⃣ Trả data bình thường
-        val filtered = if (!query.isNullOrBlank()) {
-            users.filter {
-                it.username.contains(query, ignoreCase = true)
+        // 2. Filter map
+        filters.forEach { (key, value) ->
+            result = when (key) {
+                "role" -> result.filter { it.role.name == value.toString() }
+                else   -> result
             }
-        } else {
-            users.toList()
         }
 
-        val start = page * pageSize
-        if (start >= filtered.size) return emptyList()
+        // 3. Sort
+        result = when (sortOption?.field) {
+            "username" -> if (sortOption.ascending) result.sortedBy { it.username }
+                          else result.sortedByDescending { it.username }
+            "email"    -> if (sortOption.ascending) result.sortedBy { it.email }
+                          else result.sortedByDescending { it.email }
+            "id"       -> if (sortOption.ascending) result.sortedBy { it.id }
+                          else result.sortedByDescending { it.id }
+            else       -> result
+        }
 
-        return filtered.drop(start).take(pageSize)
+        // 4. Phân trang
+        val start = page * pageSize
+        if (start >= result.size) return emptyList()
+        return result.drop(start).take(pageSize)
     }
 
     override suspend fun getPagedItems(
         page: Int,
         pageSize: Int,
-        query: String?
+        query: String?,
+        sortOption: SortOption?,
+        filters: Map<String, Any>,
     ): PagedResult<UserDto> {
-        
-        delay(300) // giả lập lag mạng
-
-        val items = getItems(page, pageSize, query)
-
-        val totalCount = users.size
-
-        return PagedResult(
-            items = items,
-            totalCount = totalCount
-        )
+        delay(300)
+        val items = getItems(page, pageSize, query, sortOption, filters)
+        return PagedResult(items = items, totalCount = users.size)
     }
 
     override suspend fun add(item: UserDto) {
@@ -109,12 +96,8 @@ class UserListFakeDataSourceWithError @Inject constructor() : UserListDataSource
     }
 
     override suspend fun remove(item: UserDto) {
-        // delay(300)
         users.removeIf { it.id == item.id }
     }
 }
 
-/**
- * Fake exception để test error UI
- */
 class FakeNetworkException : Exception("No internet connection")

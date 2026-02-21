@@ -2,10 +2,10 @@ package com.xxx.app.feature_user.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.xxx.app.feature_user.data.datasource.UserListFakeDataSource
+import com.xxx.app.feature_user.data.datasource.UserListFakeDataSourceWithError
 
 class UserListViewModelFactory(
-    private val repository: UserListFakeDataSource
+    private val repository: UserListFakeDataSourceWithError
 ) : ViewModelProvider.Factory {
 
     override fun <T : ViewModel> create(modelClass: Class<T>): T {

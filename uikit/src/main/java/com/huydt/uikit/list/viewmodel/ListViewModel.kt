@@ -1,231 +1,107 @@
 package com.huydt.uikit.list.viewmodel
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.huydt.uikit.list.config.*
+import com.huydt.uikit.list.config.ListConfig
 import com.huydt.uikit.list.data.ListRepository
+import com.huydt.uikit.list.ui.swipe.SwipeActions
+import com.huydt.uikit.list.data.SortOption
 import com.huydt.uikit.list.ui.state.*
-import com.huydt.uikit.list.ui.swipe.*
-import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
+/**
+ * Tầng PAGING: kế thừa Base, thêm load/loadMore/pagination/search.
+ *
+ * Hai chế độ:
+ *  - config.enableLoadMore = true  → infinite scroll (load more)
+ *  - config.enableLoadMore = false → page-based pagination (prev / next / goTo)
+ */
 open class ListViewModel<T>(
     private val repository: ListRepository<T>,
-    val config: ListConfig = ListConfig()
-) : ViewModel() {
+    config: ListConfig = ListConfig()
+) : ListViewModelBase<T>(config) {
 
-    /* ------------ State ------------ */
+    /** Override trong subclass để cung cấp swipe actions cho từng item */
+    open fun swipeActions(item: T): SwipeActions = SwipeActions()
 
-    private val _scrollToTop = Channel<Unit>(Channel.BUFFERED)
-    val scrollToTop = _scrollToTop.receiveAsFlow()
-
-    private val _uiState = MutableStateFlow(ListUiState<T>())
-    val uiState: StateFlow<ListUiState<T>> = _uiState
-
-    open fun swipeActions(item: T): SwipeActions<T> =
-        SwipeActions()
+    /**
+     * Gọi từ UI khi user tap vào swipe action button.
+     * Override trong subclass để xử lý từng actionId.
+     */
+    open fun onSwipeActionClick(item: T, actionId: String) = Unit
 
     private var page = 0
     private var runtimeTotalCount: Int? = null
+    private var runtimeTotalPages: Int? = null
     private var currentQuery: String? = null
     private var searchJob: Job? = null
     private var loadJob: Job? = null
 
-    /* =========================================================
-     * Selection API (GIỮ NGUYÊN)
-     * ========================================================= */
-
-    fun toggleSelectAll() {
-        val state = _uiState.value
-        if (state.isAllSelected) clearSelection()
-        else selectAll()
-    }
-
-    fun toggleSelection(item: T) {
-        when (config.selectionMode) {
-            SelectionMode.NONE -> return
-            SelectionMode.SINGLE -> setSelection(
-                if (_uiState.value.selectedItems.contains(item)) emptySet()
-                else setOf(item)
-            )
-            SelectionMode.MULTI -> withSelection {
-                if (contains(item)) this - item else this + item
-            }
-        }
-    }
-
-    fun select(item: T) {
-        when (config.selectionMode) {
-            SelectionMode.NONE -> return
-            SelectionMode.SINGLE -> setSelection(setOf(item))
-            SelectionMode.MULTI -> withSelection { this + item }
-        }
-    }
-
-    fun unselect(item: T) {
-        withSelection { this - item }
-    }
-
-    fun clearSelection() {
-        setSelection(emptySet())
-    }
-
-    fun selectAll() {
-        if (config.selectionMode != SelectionMode.MULTI) return
-        setSelection(_uiState.value.items.toSet())
-    }
+    /* ── Hooks từ Base ── */
+    override fun onItemsChanged() = tryLoadIfEmpty()
+    override fun onSortChanged(option: SortOption?) = refresh()
+    override fun onFilterChanged(filters: Map<String, Any>) = refresh()
 
     private fun tryLoadIfEmpty() {
-        val state = _uiState.value
-
+        val state = currentState
         if (state.items.isEmpty() &&
-            state.canLoadMore &&
+            (state.canLoadMore || !config.enableLoadMore) &&
             state.pagingState is PagingState.Idle &&
             state.mutationState is MutationState.Idle
-        ) {
-            refresh()
-        }
-    }
-
-    protected fun setSelection(items: Set<T>) {
-        _uiState.update { it.copy(selectedItems = items) }
-    }
-
-    protected fun withSelection(transform: Set<T>.() -> Set<T>) {
-        _uiState.update {
-            it.copy(selectedItems = it.selectedItems.transform())
-        }
+        ) refresh()
     }
 
     /* =========================================================
-     * Data mutation API (GIỮ NGUYÊN 100%)
-     * ========================================================= */
-
-    protected fun setItems(items: List<T>) {
-        _uiState.update { it.copy(items = items) }
-    }
-
-    protected fun addItem(item: T) {
-        _uiState.update { it.copy(items = it.items + item) }
-    }
-
-    protected fun addItems(items: List<T>) {
-        _uiState.update { it.copy(items = it.items + items) }
-    }
-
-    protected fun updateItem(predicate: (T) -> Boolean, newItem: T) {
-        _uiState.update {
-            it.copy(
-                items = it.items.map { item ->
-                    if (predicate(item)) newItem else item
-                }
-            )
-        }
-    }
-
-    protected fun updateItems(transform: (List<T>) -> List<T>) {
-        _uiState.update { it.copy(items = transform(it.items)) }
-    }
-
-    protected fun removeItem(item: T) {
-        _uiState.update {
-            it.copy(
-                items = it.items - item,
-                selectedItems = it.selectedItems - item
-            )
-        }
-    }
-
-    protected fun removeItems(predicate: (T) -> Boolean) {
-        _uiState.update {
-            val removed = it.items.filter(predicate).toSet()
-            it.copy(
-                items = it.items.filterNot(predicate),
-                selectedItems = it.selectedItems - removed
-            )
-        }
-        tryLoadIfEmpty()
-    }
-
-    protected fun clearItems() {
-        _uiState.update {
-            it.copy(
-                items = emptyList(),
-                selectedItems = emptySet()
-            )
-        }
-        tryLoadIfEmpty()
-    }
-
-    protected fun resetPaging() {
-        page = 0
-    }
-
-    /* =========================================================
-     * Paging / Query (CHUYỂN SANG pagingState)
+     * Infinite scroll mode
      * ========================================================= */
 
     fun refresh() {
         if (!config.enableRefresh) return
-        if (_uiState.value.pagingState is PagingState.Refreshing) return
+        if (currentState.pagingState is PagingState.Refreshing) return
 
         loadJob?.cancel()
-
         loadJob = viewModelScope.launch {
-
-            _uiState.update {
-                it.copy(
+            updateState {
+                copy(
                     pagingState = PagingState.Refreshing,
-                    selectedItems = emptySet()
+                    selectedItems = emptySet(),
+                    errorMessage = null
                 )
             }
 
-            resetPaging()
+            page = 0
             runtimeTotalCount = null
+            runtimeTotalPages = null
 
-            if (config.clearOnRefresh) {
-                clearItems()
-            }
+            if (config.clearOnRefresh) clearItems()
 
             try {
-                // ==== 2 MODE LOGIC ====
-                val paged = repository.getPagedItems(page, config.pageSize, currentQuery)
+                val result = fetchPage(page)
+                if (result.items.isNotEmpty()) page++
 
-                val data: List<T>
-
-                if (paged != null) {
-                    data = paged.items
-                    runtimeTotalCount = paged.totalCount
-                } else {
-                    data = repository.getItems(page, config.pageSize, currentQuery)
-                }
-
-                if (data.isNotEmpty()) page++
-
-                _uiState.update {
-                    val canLoad = when {
-                        !config.enableLoadMore -> false
-                        runtimeTotalCount != null -> data.size < runtimeTotalCount!!
-                        else -> data.size == config.pageSize
-                    }
-
-                    it.copy(
-                        items = data,
+                updateState {
+                    val canLoad = resolveCanLoadMore(result.items, result.totalCount)
+                    copy(
+                        items = result.items,
                         pagingState = PagingState.Idle,
-                        canLoadMore = canLoad
+                        canLoadMore = canLoad,
+                        currentPage = 1,
+                        totalPages = result.totalPages ?: 1,
+                        totalCount = result.totalCount ?: 0,
+                        emptyMessage = if (result.items.isEmpty()) emptyMessage else null
                     )
                 }
-
-                _scrollToTop.send(Unit)
-
+                sendScrollToTop()
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                _uiState.update {
-                    it.copy(
+                updateState {
+                    copy(
                         pagingState = PagingState.Error(e.message ?: "Unknown Error"),
-                        canLoadMore = false
+                        canLoadMore = false,
+                        errorMessage = e.message
                     )
                 }
             }
@@ -233,70 +109,178 @@ open class ListViewModel<T>(
     }
 
     fun loadMore() {
-        val state = _uiState.value
-
-        if (!config.enableLoadMore ||
-            !state.canLoadMore ||
+        if (!config.enableLoadMore) return
+        val state = currentState
+        if (!state.canLoadMore ||
             state.pagingState !is PagingState.Idle ||
             state.mutationState !is MutationState.Idle
         ) return
 
         loadJob = viewModelScope.launch {
-
-            _uiState.update {
-                it.copy(pagingState = PagingState.LoadingMore)
-            }
-
+            setPagingState(PagingState.LoadingMore)
             try {
-                // ==== 2 MODE LOGIC ====
-                val paged = repository.getPagedItems(page, config.pageSize, currentQuery)
+                val result = fetchPage(page)
+                if (result.items.isNotEmpty()) page++
 
-                val more: List<T>
-
-                if (paged != null) {
-                    more = paged.items
-                    runtimeTotalCount = paged.totalCount
-                } else {
-                    more = repository.getItems(page, config.pageSize, currentQuery)
-                }
-
-                if (more.isNotEmpty()) page++
-
-                _uiState.update {
-                    val newItems = it.items + more
-
-                    val canLoad = when {
-                        !config.enableLoadMore -> false
-                        runtimeTotalCount != null -> newItems.size < runtimeTotalCount!!
-                        else -> more.size == config.pageSize
-                    }
-
-                    it.copy(
+                updateState {
+                    val newItems = items + result.items
+                    val canLoad = resolveCanLoadMore(result.items, result.totalCount, newItems.size)
+                    copy(
                         items = newItems,
                         pagingState = PagingState.Idle,
-                        canLoadMore = canLoad
+                        canLoadMore = canLoad,
+                        totalCount = result.totalCount ?: totalCount
                     )
                 }
-
             } catch (e: CancellationException) {
                 throw e
             } catch (_: Exception) {
-                _uiState.update {
-                    it.copy(pagingState = PagingState.Idle)
+                setPagingState(PagingState.Idle)
+            }
+        }
+    }
+
+    /* =========================================================
+     * Pagination mode (enableLoadMore = false)
+     * ========================================================= */
+
+    fun goToPage(targetPage: Int) {
+        if (config.enableLoadMore) return
+        val total = runtimeTotalPages ?: currentState.totalPages
+        if (targetPage < 1 || targetPage > total) return
+        if (currentState.pagingState !is PagingState.Idle) return
+
+        loadJob?.cancel()
+        loadJob = viewModelScope.launch {
+            setPagingState(PagingState.Refreshing)
+            try {
+                val result = fetchPage(targetPage - 1) // 0-based
+
+                updateState {
+                    copy(
+                        items = result.items,
+                        pagingState = PagingState.Idle,
+                        currentPage = targetPage,
+                        totalPages = result.totalPages ?: totalPages,
+                        totalCount = result.totalCount ?: totalCount,
+                        canLoadMore = false,
+                        selectedItems = emptySet()
+                    )
+                }
+                sendScrollToTop()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                updateState {
+                    copy(
+                        pagingState = PagingState.Error(e.message ?: "Unknown Error"),
+                        errorMessage = e.message
+                    )
                 }
             }
         }
     }
 
-    fun search(query: String) {
-        currentQuery = query
-        searchJob?.cancel()
+    fun nextPage() = goToPage(currentState.currentPage + 1)
+    fun previousPage() = goToPage(currentState.currentPage - 1)
+    fun firstPage() = goToPage(1)
+    fun lastPage() = goToPage(runtimeTotalPages ?: currentState.totalPages)
 
+    /* =========================================================
+     * Search
+     * ========================================================= */
+
+    fun search(query: String) {
+        val trimmed = query.trim()
+        if (trimmed == currentQuery) return
+        currentQuery = trimmed
+        searchJob?.cancel()
         searchJob = viewModelScope.launch {
-            delay(500)
+            delay(config.searchDebounceMs)
             refresh()
         }
     }
 
+    open fun clearSearch() {
+        if (currentQuery == null) return
+        currentQuery = null
+        searchJob?.cancel()
+        refresh()
+    }
+
+    /* =========================================================
+     * Optimistic update
+     * ========================================================= */
+
+    suspend fun optimisticRemove(item: T, block: suspend () -> Unit) {
+        updateState {
+            copy(items = items - item, selectedItems = selectedItems - item)
+        }
+        try {
+            block()
+        } catch (e: Exception) {
+            addItem(item) // rollback
+            sendEvent(ListEvent.ShowMessage("Xóa thất bại: ${e.message}"))
+        }
+    }
+
+    /* =========================================================
+     * Convenience aliases
+     * ========================================================= */
+
     fun load() = refresh()
+    fun reload() = refresh()
+
+    /* =========================================================
+     * Private helpers
+     * ========================================================= */
+
+    private data class FetchResult<T>(
+        val items: List<T>,
+        val totalCount: Int?,
+        val totalPages: Int?,
+    )
+
+    private suspend fun fetchPage(zeroBasedPage: Int): FetchResult<T> {
+        val state = currentState
+        val paged = repository.getPagedItems(
+            page = zeroBasedPage,
+            pageSize = config.pageSize,
+            query = currentQuery,
+            sortOption = state.sortOption,   // đã dùng com.huydt.uikit.list.data.SortOption
+            filters = state.filterOptions,
+        )
+
+        return if (paged != null) {
+            runtimeTotalCount = paged.totalCount
+            val totalPg = if (paged.totalPages > 0) paged.totalPages
+                          else calculateTotalPages(paged.totalCount, config.pageSize)
+            runtimeTotalPages = totalPg
+            FetchResult(paged.items, paged.totalCount, totalPg)
+        } else {
+            val items = repository.getItems(
+                page = zeroBasedPage,
+                pageSize = config.pageSize,
+                query = currentQuery,
+                sortOption = state.sortOption,
+                filters = state.filterOptions,
+            )
+            FetchResult(items, null, null)
+        }
+    }
+
+    private fun resolveCanLoadMore(
+        latestBatch: List<T>,
+        totalCount: Int?,
+        currentSize: Int = latestBatch.size,
+    ): Boolean {
+        if (!config.enableLoadMore) return false
+        return if (totalCount != null) currentSize < totalCount
+               else latestBatch.size == config.pageSize
+    }
+
+    private fun calculateTotalPages(totalCount: Int, pageSize: Int): Int {
+        if (pageSize <= 0) return 1
+        return (totalCount + pageSize - 1) / pageSize
+    }
 }

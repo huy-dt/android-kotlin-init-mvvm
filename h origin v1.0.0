@@ -1,0 +1,36 @@
+9bec000 2026-02-20 fix load data
+ce72430 2026-02-20 fix topbar overflow menu
+ea4965b 2026-02-20 fix uikit.list
+3103749 2026-02-20 update topbar v1.0
+2f3dfd0 2026-02-18 add filter sort search
+58e727b 2026-02-17 fix topbar
+87eaa7d 2026-02-12 fix pullRefresh + icon
+2334ba1 2026-02-11 fix uikit
+49a929a 2026-02-10 fix items construct
+a29fde7 2026-02-09 use topbar v2
+5f5e823 2026-02-09 fix topbar
+4fca5b2 2026-02-08 add chmod +x
+99f02b8 2026-02-08 add chmod +x
+85880d7 2026-02-08 auto build
+31b89ac 2026-02-08 fix build gitspace
+2a0f72a 2026-02-08 fix build gitspace
+db22c9a 2026-02-08 fix build gitspace
+bfd954d 2026-02-08 fix build gitspace
+36f2fa5 2026-02-08 fix build gitspace
+75f2a19 2026-02-08 Refactor build.sh for improved Android SDK setup
+2296adc 2026-02-08 Create install-jdk-21.sh script
+3e5509b 2026-02-08 Update and rename Build.sh to install-java.sh
+6b7b373 2026-02-08 Add Android SDK setup script
+4f9085e 2026-02-08 Create Build.sh
+ad88be7 2026-02-08 add topbar
+573a6e8 2026-02-07 fix loadItems + bug
+6c65ddf 2026-02-07 fix bug selectMode when Scroll
+feac283 2026-02-07 add struct
+ebbbf86 2026-02-07 change factory to Hilt
+f4461c4 2026-02-07 final use factory
+678810b 2026-02-07 uikitList final
+747d43d 2026-02-06 fix uikit.list
+d30aeee 2026-02-06 add wipe + fix
+da29bed 2026-02-05 add UiKitListView
+df13a6a 2026-02-05 demo uikit
+51cd6a8 2026-02-05 init

@@ -1,7 +1,6 @@
 package com.xxx.app.feature_user.ui
 
 import androidx.compose.animation.*
-import com.huydt.uikit.topbar.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,13 +10,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.huydt.uikit.list.config.SelectionMode
+import com.huydt.uikit.topbar.*
 import com.xxx.app.feature_user.ui.viewmodel.TopBarMode
 import com.xxx.app.feature_user.ui.viewmodel.UserListViewModel
 
 @Composable
 fun ListUserScreenWithTopBar(
     onBack: (() -> Unit)?,
-    vm: UserListViewModel
+    vm: UserListViewModel,
 ) {
     val uiState      by vm.uiState.collectAsStateWithLifecycle()
     val topBarMode   by vm.topBarMode.collectAsStateWithLifecycle()
@@ -26,12 +26,14 @@ fun ListUserScreenWithTopBar(
     val filterBadge  by vm.activeFilterCount.collectAsStateWithLifecycle()
     val sortState    by vm.sortState.collectAsStateWithLifecycle()
 
-    // 🔥 Derive selectedId từ mode
+    // isSelectionMode → isAnySelected (tên mới trong ListUiState)
+    val isSelectionMode = uiState.isAnySelected
+
     val selectedId = when (topBarMode) {
         TopBarMode.SEARCH -> "search"
         TopBarMode.FILTER -> "filter"
         TopBarMode.SORT   -> "sort"
-        else -> null
+        else              -> null
     }
 
     Column(
@@ -41,25 +43,20 @@ fun ListUserScreenWithTopBar(
     ) {
 
         // 1️⃣ TopBar
-        if (uiState.isSelectionMode) {
-
+        if (isSelectionMode) {
             ListSelectionTopBar(
-                selectedCount = uiState.selectedItems.size,
+                selectedCount = uiState.selectedCount,       // dùng computed property
                 isAllSelected = uiState.isAllSelected,
                 onCancelSelection = vm::clearSelection,
                 onToggleSelectAll = vm::toggleSelectAll.takeIf {
                     vm.selectionMode == SelectionMode.MULTI
                 },
                 onDeleteSelected = vm::deleteSelected,
-                onExportSelected = vm::exportSelected
+                onExportSelected = vm::exportSelected,
             )
-
         } else {
-
             ListTopBar(
                 filterBadge = filterBadge,
-
-                // 👇 Sync với TopBarMode
                 selectedId = selectedId,
                 onSelectedChange = { id ->
                     when (id) {
@@ -69,7 +66,6 @@ fun ListUserScreenWithTopBar(
                         null     -> vm.closeBar()
                     }
                 },
-
                 onBack = onBack,
                 onRefresh = vm::refresh,
                 onSearch = vm::openSearch,
@@ -77,7 +73,7 @@ fun ListUserScreenWithTopBar(
                 onSort = vm::openSort,
                 onImport = vm::importData,
                 onExport = vm::exportAll,
-                onDeleteAll = vm::deleteAll
+                onDeleteAll = vm::deleteAll,
             )
         }
 
@@ -85,40 +81,33 @@ fun ListUserScreenWithTopBar(
         AnimatedVisibility(
             visible = topBarMode != TopBarMode.NORMAL,
             enter = expandVertically() + fadeIn(),
-            exit = shrinkVertically() + fadeOut()
+            exit = shrinkVertically() + fadeOut(),
         ) {
             when (topBarMode) {
+                TopBarMode.SEARCH -> InlineSearchBar(
+                    query = searchQuery,
+                    onQueryChange = vm::onSearchQueryChange,
+                    onClose = {
+                        vm.clearSearch()
+                        vm.closeBar()
+                    }
+                )
 
-                TopBarMode.SEARCH -> {
-                    InlineSearchBar(
-                        query = searchQuery,
-                        onQueryChange = vm::onSearchQueryChange,
-                        onClose = {
-                            vm.clearSearch()
-                            vm.closeBar()
-                        }
-                    )
-                }
+                TopBarMode.FILTER -> InlineFilterBar(
+                    groups = filterGroups,
+                    onSelect = vm::onFilterSelect,
+                    onClearAll = vm::clearAllFilters,
+                    onClose = vm::closeBar,
+                )
 
-                TopBarMode.FILTER -> {
-                    InlineFilterBar(
-                        groups = filterGroups,
-                        onSelect = vm::onFilterSelect,
-                        onClearAll = vm::clearAllFilters,
-                        onClose = vm::closeBar
-                    )
-                }
-
-                TopBarMode.SORT -> {
-                    InlineSortBar(
-                        options = vm.sortOptions,
-                        sortState = sortState,
-                        onSelect = vm::onSortSelect,
-                        onToggleDir = vm::onToggleSortDirection,
-                        onClear = vm::clearSort,
-                        onClose = vm::closeBar
-                    )
-                }
+                TopBarMode.SORT -> InlineSortBar(
+                    options = vm.sortOptions,
+                    sortState = sortState,
+                    onSelect = vm::onSortSelect,
+                    onToggleDir = vm::onToggleSortDirection,
+                    onClear = vm::clearSort,
+                    onClose = vm::closeBar,
+                )
 
                 else -> Unit
             }
@@ -127,7 +116,7 @@ fun ListUserScreenWithTopBar(
         // 3️⃣ Content
         _ListUserScreen(
             vm = vm,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
         )
     }
 }
